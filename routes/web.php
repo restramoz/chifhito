@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Admin\ArticleController as AdminArticleController;
 use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\ServiceCatalogController;
 use App\Http\Controllers\ProgramController;
 use App\Http\Controllers\PublicArticleController;
 use App\Http\Controllers\RegionalController;
@@ -17,6 +18,9 @@ Route::get('/', function () {
 
     return view('home', compact('latestArticles'));
 })->name('home');
+
+// Searchable directory for the complete public service catalog.
+Route::get('/katalog-layanan', [ServiceCatalogController::class, 'index'])->name('catalog.index');
 
 // XML Sitemap for Search Engines
 Route::get('/sitemap.xml', [SitemapController::class, 'index'])->name('sitemap');

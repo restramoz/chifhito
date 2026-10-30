@@ -194,6 +194,22 @@ class ProgramPagesTest extends TestCase
         $home = $this->get(route('home'));
 
         $home->assertStatus(200);
-        $home->assertSee(route('program.show', 'teknisi-pelindian'), false);
+        $home->assertSee(route('catalog.index'), false);
+        $this->get(route('catalog.index'))
+            ->assertOk()
+            ->assertSee(route('program.show', 'teknisi-pelindian'), false);
+    }
+
+    public function test_dedicated_service_slugs_resolve_to_detail_pages(): void
+    {
+        foreach (['sia', 'slo', 'slf', 'riksa-uji'] as $slug) {
+            $program = app(SchemeService::class)->find($slug);
+            $this->assertNotNull($program);
+            $this->assertSame($slug, $program['slug']);
+            $this->assertSame('/layanan/' . $slug, parse_url(route('program.show', $slug), PHP_URL_PATH));
+            $this->get(route('program.show', $slug))
+                ->assertOk()
+                ->assertSee($program['title']);
+        }
     }
 }

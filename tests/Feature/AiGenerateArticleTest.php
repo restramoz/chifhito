@@ -88,6 +88,31 @@ class AiGenerateArticleTest extends TestCase
         $this->assertArrayNotHasKey('status', $response->json());
     }
 
+    public function test_dedicated_service_slugs_are_accepted_for_article_generation(): void
+    {
+        $admin = User::factory()->create(['is_admin' => true]);
+        $this->bindFakeRegional(['name' => 'Test City', 'slug' => 'some-city']);
+
+        $serviceSlugs = ['sia', 'slo', 'slf', 'riksa-uji'];
+        $ollama = $this->createMock(OllamaService::class);
+        $ollama->expects($this->exactly(count($serviceSlugs)))
+            ->method('generateArticle')
+            ->with($this->callback(fn (array $params): bool => in_array($params['service_slug'] ?? null, $serviceSlugs, true)))
+            ->willReturn(['success' => true, 'title' => 'Draft', 'slug' => 'draft', 'content' => '<p>Konten</p>']);
+        $this->app->instance(OllamaService::class, $ollama);
+
+        foreach ($serviceSlugs as $serviceSlug) {
+            $this->actingAs($admin)
+                ->postJson(route('admin.articles.ai-generate'), [
+                    'city_slug' => 'some-city',
+                    'word_count' => 7500,
+                    'service_slug' => $serviceSlug,
+                ])
+                ->assertOk()
+                ->assertJson(['success' => true]);
+        }
+    }
+
     public function test_generation_failure_returns_500_with_error(): void
     {
         $admin = User::factory()->create(['is_admin' => true]);

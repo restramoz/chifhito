@@ -1,8 +1,8 @@
 @extends('layouts.app')
 
-@section('title', 'Jucerdyamg — Katalog Layanan & Pelatihan Industri Terpadu')
+@section('title', config('app.name', 'Najkaltare') . ' — Katalog Layanan & Pelatihan Industri Terpadu')
 
-@section('meta_description', 'Jelajahi katalog layanan dan pelatihan industri profesional Jucerdyamg. Temukan ribuan layanan dari 21 kategori kompetensi dan konsultasikan kebutuhan Anda via WhatsApp.')
+@section('meta_description', 'Jelajahi katalog layanan dan pelatihan industri profesional ' . config('app.name', 'Najkaltare') . '. Temukan ribuan layanan dari 21 kategori kompetensi dan konsultasikan kebutuhan Anda via WhatsApp.')
 
 @section('content')
 @php
@@ -12,27 +12,46 @@
     $schemeService = app(\App\Services\SchemeService::class);
     $allPrograms = $schemeService->all();
 
-    /*
-     * Kelompokkan berdasarkan kategori asli dari layanan.json.
-     * Menggunakan metadata representatif untuk setiap kategori.
-     */
-    $categories = collect($allPrograms)
-        ->groupBy(fn ($item) => $item['category_label'] ?? 'Layanan Lainnya')
-        ->map(function ($items, $categoryName) use ($schemeService) {
-            $slug = \Illuminate\Support\Str::slug($categoryName);
-            return [
-                'name' => $categoryName,
-                'slug' => $slug,
-                'items' => $items,
-                'count' => $items->count(),
-                'meta' => $schemeService::categoryMetadata($categoryName),
-            ];
-        })
-        ->sortBy('name')
+    $catalogCategoryCount = collect($allPrograms)
+        ->pluck('category_label')
+        ->filter()
+        ->unique()
+        ->count();
+    $specialSlugs = ['sia', 'slo', 'slf', 'riksa-uji'];
+    $featuredServices = collect($specialSlugs)
+        ->map(fn ($slug) => $schemeService->find($slug))
+        ->filter()
         ->values();
+    $catalogCardPrograms = collect($allPrograms);
+    $categories = collect([
+        [
+            'name' => 'Kategori Layanan',
+            'slug' => 'kategori-layanan',
+            'items' => $catalogCardPrograms,
+            'count' => $catalogCardPrograms->count(),
+            'meta' => [
+                'image' => '/images/home/hero-industrial.jpg',
+                'alt' => 'Ragam layanan dan pelatihan profesional di lingkungan industri',
+                'description' => 'Jelajahi seluruh layanan dari ' . number_format($catalogCategoryCount, 0, ',', '.') . ' kategori industri melalui katalog lengkap yang dapat dicari.',
+            ],
+            'type' => 'catalog',
+        ],
+        [
+            'name' => 'Jasa SIA, SLO, SLF & Riksa Uji',
+            'slug' => 'jasa-sia-slo-slf-riksa-uji',
+            'items' => $featuredServices,
+            'count' => $featuredServices->count(),
+            'meta' => [
+                'image' => '/images/home/sumber-teknisi.jpg',
+                'alt' => 'Pemeriksaan teknis dan layanan kelaikan fasilitas industri',
+                'description' => 'Akses informasi layanan SIA, SLO, SLF, dan Riksa Uji, masing-masing dengan halaman detail tersendiri.',
+            ],
+            'type' => 'featured',
+        ],
+    ]);
 
     $totalServices = count($allPrograms);
-    $totalCategories = $categories->count();
+    $totalCategories = $catalogCategoryCount;
 
     // Query artikel terpublikasi asli dari database
     $latestArticles = $latestArticles ?? (
@@ -65,7 +84,7 @@
 
                 <span class="inline-flex self-start items-center gap-2 rounded-full border border-[#00C2A8]/30 bg-[#00C2A8]/10 px-4 py-2 text-xs font-bold tracking-wide text-[#00C2A8] sm:text-sm">
                     <span class="h-2 w-2 rounded-full bg-[#00C2A8]"></span>
-                    Jucerdyamg · Katalog Layanan &amp; Pelatihan Industri
+                    {{ config('app.name', 'Najkaltare') }} · Katalog Layanan &amp; Pelatihan Industri
                 </span>
 
                 <h1 id="hero-heading"
@@ -143,7 +162,7 @@
 
                     <div class="absolute inset-x-0 bottom-0 p-5 sm:p-7">
                         <span class="inline-flex rounded-full border border-[#00C2A8]/30 bg-[#111318]/80 px-3 py-1.5 text-xs font-bold text-[#00C2A8] backdrop-blur-md">
-                            Katalog Terpadu Jucerdyamg
+                            Katalog Terpadu {{ config('app.name', 'Najkaltare') }}
                         </span>
 
                         <h2 class="mt-3 text-xl font-black leading-snug text-white sm:text-2xl">
@@ -188,7 +207,7 @@
             </h2>
 
             <p class="mx-auto mt-4 max-w-2xl text-sm leading-relaxed text-[#535B66] sm:text-base">
-                Katalog disusun secara rapi berdasarkan 21 kategori industri. Pilih kategori untuk melihat daftar layanan yang tersedia dan jelajahi halaman informasi spesifik masing-masing.
+                Pilih jalur layanan yang sesuai: jelajahi seluruh katalog industri atau akses langsung layanan SIA, SLO, SLF, dan Riksa Uji.
             </p>
 
             <div class="mt-5 inline-flex items-center gap-2 rounded-full bg-white px-4 py-2 text-xs font-bold text-[#252932] shadow-sm border border-[#E1E5EA]">
@@ -199,8 +218,8 @@
             </div>
         </div>
 
-        <!-- 21 Categories Grid -->
-        <div class="mt-12 grid grid-cols-1 items-start gap-6 md:grid-cols-2 xl:grid-cols-3">
+        <!-- Two primary service pathways -->
+        <div class="mt-10 grid grid-cols-1 items-stretch gap-6 lg:grid-cols-2 lg:gap-8">
 
             @foreach ($categories as $category)
                 @php
@@ -211,10 +230,11 @@
                     $listId = 'category-list-' . $categorySlug;
                 @endphp
 
-                <article data-scheme-section="{{ $categorySlug }}"
+                <article data-primary-service-card="{{ $category['type'] }}"
+                         data-scheme-section="{{ $categorySlug }}"
                          data-scheme-category="{{ $category['name'] }}"
                          data-show-group
-                         class="group flex min-w-0 flex-col overflow-hidden rounded-2xl border border-[#E1E5EA] bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:border-[#00C2A8]/50">
+                         class="group flex min-w-0 flex-col overflow-hidden rounded-2xl border border-[#DCE4E5] bg-white shadow-md transition-all duration-300 hover:-translate-y-1 hover:border-[#00A991]/60 hover:shadow-xl focus-within:ring-2 focus-within:ring-[#00C2A8]/40">
 
                     <!-- Category Card Top: Representative Image & Dark Overlay -->
                     <div class="relative aspect-[16/10] overflow-hidden bg-[#111318]">
@@ -242,7 +262,7 @@
                         <!-- Category Title & Subject Label (Bottom-Left) -->
                         <div class="absolute inset-x-0 bottom-0 p-5">
                             <span class="text-[11px] font-bold uppercase tracking-wider text-[#00C2A8]">
-                                Kategori Industri
+                                {{ $category['type'] === 'catalog' ? 'Jelajahi Seluruh Katalog' : 'Layanan Teknis Khusus' }}
                             </span>
                             <h3 class="mt-1 text-lg font-black leading-snug text-white sm:text-xl drop-shadow-sm">
                                 {{ $category['name'] }}
@@ -254,9 +274,15 @@
                     <div class="flex flex-1 flex-col p-5">
 
                         <!-- Contextual Description -->
-                        <p class="text-xs sm:text-sm text-[#535B66] leading-relaxed mb-4">
+                        <p class="text-sm leading-relaxed text-[#535B66] mb-4">
                             {{ $catMeta['description'] }}
                         </p>
+
+                        @if ($category['type'] === 'catalog')
+                            <a href="{{ route('catalog.index') }}" class="mb-4 inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-[#006E5E] px-4 py-3 text-sm font-extrabold text-white shadow-sm transition hover:bg-[#00584C] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00C2A8] focus-visible:ring-offset-2">
+                                Jelajahi Kategori Layanan <span aria-hidden="true">&rarr;</span>
+                            </a>
+                        @endif
 
                         <!-- Contextual WhatsApp Consultation for Category -->
                         @if ($waPhone)
@@ -386,7 +412,7 @@
 
             <div class="absolute bottom-0 left-0 right-0 p-6 lg:hidden">
                 <span class="text-xs font-bold uppercase tracking-widest text-[#00C2A8]">
-                    Jucerdyamg
+                    {{ config('app.name', 'Najkaltare') }}
                 </span>
                 <h3 class="mt-2 text-2xl font-black text-white">
                     Standar Kompetensi &amp; Layanan Terarah
@@ -546,7 +572,7 @@
                 </h2>
 
                 <p class="mt-4 text-sm leading-relaxed text-[#535B66] sm:text-base">
-                    Publikasi artikel dan panduan teknis yang diterbitkan langsung oleh tim Jucerdyamg untuk memperluas pemahaman standar kompetensi.
+                    Publikasi artikel dan panduan teknis yang diterbitkan langsung oleh tim {{ config('app.name', 'Najkaltare') }} untuk memperluas pemahaman standar kompetensi.
                 </p>
             </div>
 
@@ -596,7 +622,7 @@
 
                         <div class="flex items-center justify-between gap-2">
                             <span class="self-start rounded-full bg-[#00C2A8]/10 px-3 py-1 text-[11px] font-extrabold uppercase tracking-wider text-[#006E5E]">
-                                Jucerdyamg
+                                {{ config('app.name', 'Najkaltare') }}
                             </span>
 
                             @if ($article->target_city_slug)
@@ -691,7 +717,7 @@
         </h2>
 
         <p class="mx-auto mt-5 max-w-2xl text-sm leading-relaxed text-[#C7CBD2] sm:text-base lg:text-lg">
-            Sampaikan kebutuhan pelatihan dan skema layanan organisasi Anda kepada tim Jucerdyamg. Kami siap memberikan informasi jadwal, persyaratan, serta prosedur pendaftaran.
+            Sampaikan kebutuhan pelatihan dan skema layanan organisasi Anda kepada tim {{ config('app.name', 'Najkaltare') }}. Kami siap memberikan informasi jadwal, persyaratan, serta prosedur pendaftaran.
         </p>
 
         <div class="mt-8 flex justify-center">

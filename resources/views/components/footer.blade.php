@@ -10,12 +10,12 @@
                         </svg>
                     </span>
                     <span class="flex flex-col min-w-0">
-                        <span class="text-base font-extrabold text-white tracking-tight truncate">Jucerdyamg</span>
+                        <span class="text-base font-extrabold text-white tracking-tight truncate">{{ config('app.name', 'Najkaltare') }}</span>
                         <span class="text-[11px] text-[#A0AAB8] font-medium">Layanan &amp; Pelatihan Industri</span>
                     </span>
                 </div>
                 <p class="text-sm text-[#A0AAB8] leading-relaxed">
-                    Katalog layanan dan pelatihan profesional Jucerdyamg mencakup beragam kategori kompetensi industri terpadu untuk mendukung kebutuhan dunia usaha dan tenaga kerja nasional.
+                    Katalog layanan dan pelatihan profesional {{ config('app.name', 'Najkaltare') }} mencakup beragam kategori kompetensi industri terpadu untuk mendukung kebutuhan dunia usaha dan tenaga kerja nasional.
                 </p>
             </div>
 
@@ -43,7 +43,7 @@
         </div>
 
         <div class="mt-12 pt-6 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-[#8E97A4]">
-            <p>&copy; {{ date('Y') }} Jucerdyamg. Seluruh hak cipta dilindungi.</p>
+            <p>&copy; {{ date('Y') }} {{ config('app.name', 'Najkaltare') }}. Seluruh hak cipta dilindungi.</p>
             <p>Konsultasikan kebutuhan spesifik Anda bersama tim profesional kami.</p>
         </div>
     </div>

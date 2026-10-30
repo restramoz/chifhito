@@ -5,15 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>@hasSection('title')@yield('title') — @endif{{ config('app.name', 'Jucerdyamg') }}</title>
-    <meta name="description" content="@yield('meta_description', 'Katalog layanan dan pelatihan profesional Jucerdyamg. Informasi lengkap puluhan kategori dan ribuan layanan industri terpercaya.')">
+    <title>@hasSection('title')@yield('title') — @endif{{ config('app.name', 'Najkaltare') }}</title>
+    <meta name="description" content="@yield('meta_description', 'Katalog layanan dan pelatihan profesional ' . config('app.name', 'Najkaltare') . '. Informasi lengkap puluhan kategori dan ribuan layanan industri terpercaya.')">
 
     <!-- Canonical URL -->
     <link rel="canonical" href="{{ url()->current() }}">
 
     <!-- Open Graph / Meta -->
-    <meta property="og:title" content="@hasSection('title')@yield('title') — @endif{{ config('app.name', 'Jucerdyamg') }}">
-    <meta property="og:description" content="@yield('meta_description', 'Katalog layanan dan pelatihan profesional Jucerdyamg. Konsultasikan kebutuhan industri Anda bersama tim kami.')">
+    <meta property="og:title" content="@hasSection('title')@yield('title') — @endif{{ config('app.name', 'Najkaltare') }}">
+    <meta property="og:description" content="@yield('meta_description', 'Katalog layanan dan pelatihan profesional ' . config('app.name', 'Najkaltare') . '. Konsultasikan kebutuhan industri Anda bersama tim kami.')">
     <meta property="og:type" content="website">
     <meta property="og:url" content="{{ url()->current() }}">
 

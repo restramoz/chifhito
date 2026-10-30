@@ -570,7 +570,7 @@ class SchemeService
             'level' => $lsp ?? ('Layanan ' . $categoryName),
             'title' => $name,
             'badge' => $lsp ?? ('Layanan ' . $categoryName),
-            'meta_title' => $name . ' | Jucerdyamg',
+            'meta_title' => $name . ' | ' . config('app.name', 'Najkaltare'),
             'meta_description' => 'Layanan ' . $categoryName . ' ' . $name . '. Rincian program dikonfirmasi melalui konsultasi.',
             'hero_heading' => $categoryName,
             'hero_highlight' => $name,
@@ -800,8 +800,8 @@ class SchemeService
 
         return $metadata[$slug] ?? [
             'image' => '/images/home/hero-industrial.jpg',
-            'alt' => 'Layanan dan pelatihan profesional industri Jucerdyamg',
-            'description' => 'Katalog layanan dan pelatihan profesional terpadu dari Jucerdyamg untuk mendukung peningkatan kompetensi industri.',
+            'alt' => 'Layanan dan pelatihan profesional industri ' . config('app.name', 'Najkaltare'),
+            'description' => 'Katalog layanan dan pelatihan profesional terpadu dari ' . config('app.name', 'Najkaltare') . ' untuk mendukung peningkatan kompetensi industri.',
         ];
     }
 }

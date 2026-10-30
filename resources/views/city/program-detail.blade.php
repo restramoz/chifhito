@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('title', $program['title'] . ' — ' . $city['name'])
-@section('meta_description', 'Informasi dan konsultasi ' . $program['title'] . ' untuk mitra Jucerdyamg, fasilitas produksi, dan tenaga profesional Jucerdyamg di ' . $city['name'] . ', Provinsi ' . $city['province'] . '. Rincian skema, unit kompetensi, dan persyaratan penyelenggaraan.')
+@section('meta_description', 'Informasi dan konsultasi ' . $program['title'] . ' untuk mitra ' . config('app.name', 'Najkaltare') . ', fasilitas produksi, dan tenaga profesional di ' . $city['name'] . ', Provinsi ' . $city['province'] . '. Rincian skema, unit kompetensi, dan persyaratan penyelenggaraan.')
 @section('wa_message', $waMessage)
 
 @section('content')
@@ -68,7 +68,7 @@
                     </div>
                     <div>
                         <div class="text-xs font-semibold uppercase tracking-wider text-neutral-400">Sektor</div>
-                        <div class="text-lg sm:text-xl font-extrabold text-safety-orange mt-0.5">Jucerdyamg</div>
+                        <div class="text-lg sm:text-xl font-extrabold text-safety-orange mt-0.5">{{ config('app.name', 'Najkaltare') }}</div>
                     </div>
                     <div>
                         <div class="text-xs font-semibold uppercase tracking-wider text-neutral-400">Sifat Program</div>
@@ -104,8 +104,8 @@
                                 </svg>
                             </div>
                             <div class="text-sm text-dark-mahogany leading-relaxed">
-                                <span class="font-bold text-industry-black block mb-0.5">Fokus Keselamatan Kerja Jucerdyamg</span>
-                                Program diarahkan pada pemahaman skema kompetensi, praktik kerja yang baik, dan pemeliharaan keselamatan kerja pada kegiatan Jucerdyamg di wilayah {{ $city['name'] }} dan sekitarnya.
+                                <span class="font-bold text-industry-black block mb-0.5">Fokus Keselamatan Kerja {{ config('app.name', 'Najkaltare') }}</span>
+                                Program diarahkan pada pemahaman skema kompetensi, praktik kerja yang baik, dan pemeliharaan keselamatan kerja pada kegiatan operasional di wilayah {{ $city['name'] }} dan sekitarnya.
                             </div>
                         </div>
                     </div>
@@ -187,7 +187,7 @@
                     <div class="text-sm space-y-1">
                         <h4 class="font-bold text-industry-black">Perhatian: Pembedaan Praktik Kerja Lapangan &amp; Persyaratan Sertifikasi / Dokumen</h4>
                         <p class="text-dark-mahogany leading-relaxed">
-                            Uraian peran di atas merupakan ringkasan umum lingkup operasional pada sektor Jucerdyamg. Persyaratan administratif formal ditentukan oleh skema layanan dan ketentuan yang berlaku. Calon peserta atau badan usaha dari {{ $city['name'] }} dianjurkan mengonfirmasikan berkas pribadinya kepada konsultan kami sebelum proses pendaftaran.
+                            Uraian peran di atas merupakan ringkasan umum lingkup operasional pada sektor terkait. Persyaratan administratif formal ditentukan oleh skema layanan dan ketentuan yang berlaku. Calon peserta atau badan usaha dari {{ $city['name'] }} dianjurkan mengonfirmasikan berkas pribadinya kepada konsultan kami sebelum proses pendaftaran.
                         </p>
                     </div>
                 </div>

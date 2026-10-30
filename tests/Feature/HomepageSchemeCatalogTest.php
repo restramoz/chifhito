@@ -7,35 +7,29 @@ use Tests\TestCase;
 
 class HomepageSchemeCatalogTest extends TestCase
 {
-    public function test_homepage_shows_two_distinct_scheme_sections(): void
+    public function test_homepage_shows_exactly_two_primary_service_cards(): void
     {
         $response = $this->get('/');
 
         $response->assertStatus(200);
-
-        $programs = app(SchemeService::class)->all();
-        $this->assertNotEmpty($programs);
-
-        $first = reset($programs);
-        $this->assertNotEmpty($first['category_label'] ?? null);
-        $response->assertSee($first['category_label']);
+        $this->assertSame(2, substr_count($response->getContent(), 'data-primary-service-card='));
+        $response->assertSee('Kategori Layanan');
+        $response->assertSee('Jasa SIA, SLO, SLF &amp; Riksa Uji', false);
+        $response->assertSee(route('catalog.index'), false);
     }
 
-    public function test_first_category_renders_scheme_links(): void
+    public function test_catalog_browse_page_renders_all_service_links_and_search(): void
     {
-        $response = $this->get('/');
+        $response = $this->get(route('catalog.index'));
         $response->assertStatus(200);
 
         $programs = app(SchemeService::class)->all();
         $this->assertNotEmpty($programs);
 
-        $first = reset($programs);
-        $this->assertNotEmpty($first['slug'] ?? null);
-
-        $response->assertSee(
-            route('program.show', $first['slug']),
-            false
-        );
+        $response->assertSee('id="catalog-search"', false);
+        foreach ($programs as $program) {
+            $response->assertSee(route('program.show', $program['slug']), false);
+        }
     }
 
     public function test_second_category_renders_scheme_links(): void
@@ -78,6 +72,19 @@ class HomepageSchemeCatalogTest extends TestCase
 
         $response->assertSee('/layanan/teknisi-pelindian', false);
         $response->assertSee('/layanan/', false);
+    }
+
+    public function test_featured_services_are_listed_on_homepage_with_exact_slugs(): void
+    {
+        $response = $this->get('/');
+        $response->assertOk();
+
+        foreach (['sia', 'slo', 'slf', 'riksa-uji'] as $slug) {
+            $program = app(SchemeService::class)->find($slug);
+            $this->assertNotNull($program, "Missing dedicated service slug [{$slug}].");
+            $response->assertSee(route('program.show', $slug), false);
+            $response->assertSee($program['title']);
+        }
     }
 
     public function test_first_scheme_has_no_units_in_new_catalog(): void

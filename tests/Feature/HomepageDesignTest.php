@@ -81,7 +81,7 @@ class HomepageDesignTest extends TestCase
         $response = $this->get('/');
         $response->assertStatus(200);
 
-        $response->assertSee('Jucerdyamg');
+        $response->assertSee(config('app.name', 'Najkaltare'));
         $response->assertDontSee('Training K3 Listrik');
         $response->assertDontSee('K3 Listrik');
     }

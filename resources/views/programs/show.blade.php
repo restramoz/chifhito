@@ -61,7 +61,7 @@
                     </div>
                     <div class="min-w-0">
                         <div class="text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-neutral-400">Sektor</div>
-                        <div class="text-base sm:text-lg font-extrabold text-white mt-0.5">Jucerdyamg</div>
+                        <div class="text-base sm:text-lg font-extrabold text-white mt-0.5">{{ config('app.name', 'Najkaltare') }}</div>
                     </div>
                     <div class="min-w-0">
                         <div class="text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-neutral-400">Sifat Program</div>
@@ -87,7 +87,7 @@
                             Tujuan &amp; Ruang Lingkup
                         </span>
                     </div>
-                    <img src="{{ $program['image_url'] ?? '/images/home/sumber-teknisi.jpg' }}" alt="{{ $program['image_alt'] ?? ($program['title'] . ' — aktivitas Jucerdyamg') }}" width="900" height="500" loading="lazy" decoding="async" onerror="this.onerror=null;this.src='/images/home/sumber-teknisi.jpg';" class="w-full aspect-video max-h-[360px] object-cover object-center rounded-2xl shadow-md mb-6" />
+                    <img src="{{ $program['image_url'] ?? '/images/home/sumber-teknisi.jpg' }}" alt="{{ $program['image_alt'] ?? ($program['title'] . ' — aktivitas ' . config('app.name', 'Najkaltare')) }}" width="900" height="500" loading="lazy" decoding="async" onerror="this.onerror=null;this.src='/images/home/sumber-teknisi.jpg';" class="w-full aspect-video max-h-[360px] object-cover object-center rounded-2xl shadow-md mb-6" />
                     <h2 id="pengenalan-heading" class="text-2xl sm:text-3xl font-extrabold text-industry-black tracking-tight">
                         Mengenal Lebih Dekat {{ $program['title'] }}
                     </h2>

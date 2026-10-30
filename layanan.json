@@ -1,7 +1,7 @@
 [
   {
     "kategori": "Alat Berat, Crane & Rigging",
-    "jumlah_layanan": 161,
+    "jumlah_layanan": 163,
     "layanan": [
       "Analisis Pelumas Unit Alat Berat",
       "Asisten Operator Crane (Level 1)",
@@ -163,7 +163,9 @@
       "Perbaikan Suspensi Alat Berat",
       "Perbaikan Transmisi Pada Sistem Pemindah Tenaga Mekanis Alat Berat",
       "Perencanaan LK3 Alat Berat",
-      "Rigger Pertama (Level 2)"
+      "Rigger Pertama (Level 2)",
+      "SIA",
+      "Riksa Uji"
     ]
   },
   {
@@ -1089,7 +1091,7 @@
   },
   {
     "kategori": "Konstruksi & Bangunan",
-    "jumlah_layanan": 252,
+    "jumlah_layanan": 253,
     "layanan": [
       "Ahli Elektrikal Konstruksi Bangunan Gedung",
       "Ahli Geodesi Dan Bangunan Gedung",
@@ -1342,7 +1344,8 @@
       "Tukang Plambing",
       "Tukang Plambing Level 3",
       "Tukang Plester Bangunan Gedung",
-      "Tukang Plester Bangunan Gedung Level 2"
+      "Tukang Plester Bangunan Gedung Level 2",
+      "SLF"
     ]
   },
   {
@@ -1489,7 +1492,7 @@
   },
   {
     "kategori": "Listrik, Elektronika & Instrumentasi",
-    "jumlah_layanan": 101,
+    "jumlah_layanan": 102,
     "layanan": [
       "Asisten Teknisi Refrigerasi dan AC (RAC)",
       "Auditor Energi Pada Sistem Kelistrikan",
@@ -1591,7 +1594,8 @@
       "Teknisi Senior Pemeliharaan Sistem Kelistrikan",
       "Teknisi Senior Pemograman Network PLC dan HMI",
       "Teknisi Senior Pemograman PLC dan HMI",
-      "Teknisi Spesifik Engine Elektrikal"
+      "Teknisi Spesifik Engine Elektrikal",
+      "SLO"
     ]
   },
   {

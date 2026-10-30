@@ -98,11 +98,13 @@ class OllamaService
      */
     protected function serviceContextLine(?string $serviceName): string
     {
+        $brandName = $this->brandName();
+
         if ($serviceName === null || $serviceName === '') {
-            return 'Tidak ada layanan spesifik; gunakan konteks layanan Jucerdyamg secara umum.';
+            return "{$brandName} adalah perusahaan layanan industri lintas sektor. Cerminkan cakupan katalog yang meliputi SIA, SLO, SLF, Riksa Uji, pelatihan, sertifikasi, inspeksi, dan layanan industri lainnya; jangan membatasi perusahaan pada satu industri.";
         }
 
-        return "Program spesifik: {$serviceName}. Konsentrasikan isi artikel pada lingkup skema kompetensi tersebut.";
+        return "Program spesifik: {$serviceName}. Sebutkan {$serviceName} secara alami sebagai salah satu layanan {$brandName}, lalu konsentrasikan isi artikel pada lingkup layanan tersebut.";
     }
 
     /**
@@ -137,6 +139,7 @@ class OllamaService
         }
 
         $cityName = trim((string) ($params['city_name'] ?? 'Indonesia'));
+        $brandName = $this->brandName();
         $districtName = ! empty($params['district_name']) ? trim((string) $params['district_name']) : null;
         $citySlug = $params['city_slug'] ?? null;
         $wordCount = $this->resolveWordCount($params['word_count'] ?? 7500);
@@ -156,14 +159,15 @@ class OllamaService
             $focus = $selected['focus'];
         } else {
             $topic = trim((string) $params['topic']);
-            $focus = $params['focus'] ?? ('Kompetensi ' . ($serviceName ?: 'layanan') . ' serta layanan terkait ' . ($serviceName ?: 'Jucerdyamg'));
+            $focus = $params['focus'] ?? ('Kompetensi ' . ($serviceName ?: 'layanan industri lintas sektor') . ' serta layanan terkait ' . ($serviceName ?: $brandName));
         }
 
         $locationContext = $districtName ? "Kecamatan {$districtName}, {$cityName}" : $cityName;
 
         $systemPrompt = <<<PROMPT
-Anda adalah konsultan dan instruktur kompetensi profesional Indonesia yang berspesialisasi pada pelatihan dan layanan dari berbagai industri.
-Tugas Anda adalah menulis artikel edukatif dan otoritatif dalam Bahasa Indonesia formal mengenai layanan Jucerdyamg sesuai topik yang dipilih. Struktur artikel harus mencakup: Pembuka (intro), Silabus, Materi, Isi Konten, dan Penutup (conclusion).
+Anda adalah konsultan dan instruktur kompetensi profesional Indonesia yang menulis untuk {$brandName}, perusahaan layanan industri lintas sektor.
+Tugas Anda adalah menulis artikel edukatif dan otoritatif dalam Bahasa Indonesia formal mengenai layanan {$brandName} sesuai topik yang dipilih. Cakupan perusahaan meliputi layanan SIA, SLO, SLF, Riksa Uji, pelatihan, sertifikasi, inspeksi, dan jasa industri lintas sektor; jangan menggambarkan perusahaan seolah hanya bergerak di satu industri. Struktur artikel harus mencakup: Pembuka (intro), Silabus, Materi, Isi Konten, dan Penutup (conclusion).
+Nama organisasi yang digunakan: {$brandName}. Gunakan nama ini secara konsisten bila nama organisasi diperlukan dan jangan menggantinya dengan nama organisasi lain.
 PERTIMBANGAN PROGRAM: {$this->serviceContextLine($serviceName)}
 
 ATURAN KUALITATAS & GAYA PENULISAN:
@@ -184,7 +188,7 @@ Format skema JSON yang wajib dipatuhi:
   "slug": "slug-url-ramah-seo",
   "excerpt": "Ringkasan eksekutif 2-3 kalimat mengenai intisari artikel.",
   "content": "<p>Isi artikel lengkap dalam HTML semantik...</p>",
-  "seo_title": "SEO Title Max 60 Karakter | Jucerdyamg",
+  "seo_title": "SEO Title Max 60 Karakter | {$brandName}",
   "meta_description": "Meta description persuasif max 155 karakter.",
   "suggested_faqs": [
     {"q": "Pertanyaan 1...", "a": "Jawaban ringkas 1..."},
@@ -202,7 +206,9 @@ PROMPT;
         $serviceLine = $serviceName !== null ? "- Program Spesifik: {$serviceName}\n" : '';
 
         $userPrompt = <<<PROMPT
-Silakan buat artikel layanan dan skema kompetensi lengkap dengan rincian berikut:
+Silakan buat artikel layanan dan skema kompetensi {$brandName} dengan rincian berikut:
+- Organisasi: {$brandName}
+- Cakupan layanan: SIA, SLO, SLF, Riksa Uji, pelatihan, sertifikasi, inspeksi, serta layanan industri lintas sektor.
 - Topik Artikel: {$topic}
 - Fokus Materi: {$focus}
 - Lokasi Target: {$locationContext}
@@ -346,6 +352,7 @@ PROMPT;
         $cleaned = preg_replace('/```(?:json)?/i', '', $cleaned) ?? $cleaned;
         $cleaned = str_replace('```', '', $cleaned);
         $cleaned = trim($cleaned);
+        $cleaned = str_ireplace('Jucerdyamg', $this->brandName(), $cleaned);
 
         // Repair invalid JSON escape sequences produced by LaTeX/backslashes.
         $cleaned = $this->repairJsonEscapes($cleaned);
@@ -631,7 +638,16 @@ protected function addArticleConsultationBlock(array $result): array
 
     protected function brandLine(?string $serviceName): string
     {
-        return ($serviceName === null || $serviceName === '') ? 'Jucerdyamg' : $serviceName;
+        $brandName = $this->brandName();
+
+        return ($serviceName === null || $serviceName === '')
+            ? $brandName
+            : $brandName . ' — ' . $serviceName;
+    }
+
+    protected function brandName(): string
+    {
+        return trim((string) config('app.name')) ?: 'Najkaltare';
     }
 
     /**
