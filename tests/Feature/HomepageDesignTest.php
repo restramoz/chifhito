@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Services\RegionalService;
 use Tests\TestCase;
 
 class HomepageDesignTest extends TestCase
@@ -11,7 +12,8 @@ class HomepageDesignTest extends TestCase
         $response = $this->get('/');
 
         $response->assertStatus(200);
-        $response->assertSee('Teknisi Pelindian');
+        $response->assertSee('Kompetensi teknis');
+        $response->assertSee('Chifheto');
     }
 
     public function test_homepage_includes_accessible_landmarks(): void
@@ -35,15 +37,8 @@ class HomepageDesignTest extends TestCase
         $response = $this->get('/');
 
         $response->assertStatus(200);
-        $response->assertSee('Teknisi Pelindian');
-        $response->assertSee('teknisi-pelindian');
-        $response->assertSee('Teknisi Pelindian');
-
-        // Verify no stale SIO/alat-berat references on homepage
-        $response->assertDontSee('Sertifikasi SIO');
-        $response->assertDontSee('Surat Ijin Operator');
-        $response->assertDontSee('Permenaker');
-        $response->assertDontSee('Jasa Audit');
+        $response->assertSee('Cari topik atau nama pelatihan');
+        $response->assertSee('Pertambangan dan Geologi');
 
         // Verify no invented claims
         $response->assertDontSee('Jaminan Lulus 100%');
@@ -81,8 +76,47 @@ class HomepageDesignTest extends TestCase
         $response = $this->get('/');
         $response->assertStatus(200);
 
-        $response->assertSee(config('app.name', 'Najkaltare'));
-        $response->assertDontSee('Training K3 Listrik');
-        $response->assertDontSee('K3 Listrik');
+        $response->assertSee(config('app.name', 'Chifheto'));
+        $response->assertSee('Pelatihan profesional');
+    }
+
+    public function test_homepage_and_desktop_and_mobile_nav_expose_regional_discovery(): void
+    {
+        $response = $this->get('/')->assertOk();
+        $html = $response->getContent();
+        $wilayahUrl = route('home') . '#wilayah';
+
+        $this->assertSame(2, substr_count($html, 'href="' . $wilayahUrl . '"'));
+        $response->assertSee('id="mobile-nav-drawer"', false);
+        $response->assertSee('id="wilayah-heading"', false);
+        $response->assertSee('id="province-search"', false);
+
+        $provinces = app(RegionalService::class)->getAllProvinces();
+        $this->assertCount(38, $provinces);
+        foreach ($provinces as $province) {
+            $this->assertStringContainsString(route('regional.province', $province['slug']), $html);
+        }
+    }
+
+    public function test_regional_discovery_links_through_province_city_and_district_pages(): void
+    {
+        $regional = app(RegionalService::class);
+        $provinceSummary = $regional->getAllProvinces()[0];
+        $province = $regional->findProvince($provinceSummary['slug']);
+        $this->get('/')
+            ->assertOk()
+            ->assertSee(route('regional.province', $province['slug']), false);
+
+        $city = $province['cities'][0];
+        $this->get(route('regional.province', $province['slug']))
+            ->assertOk()
+            ->assertSee(route('regional.city', $city['slug']), false);
+
+        $district = $city['districts'][0];
+        $this->get(route('regional.city', $city['slug']))
+            ->assertOk()
+            ->assertSee(route('regional.district', [$city['slug'], $district['slug']]), false);
+
+        $this->get(route('regional.district', [$city['slug'], $district['slug']]))->assertOk();
     }
 }

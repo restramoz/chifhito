@@ -42,7 +42,7 @@
                 AI
             </span>
             <h2 class="font-bold text-base text-navy-950">
-                Ollama AI Article Generator (pertambangan dan energi)
+                Generator Artikel AI · Chifheto
             </h2>
             <span class="text-[10px] px-2.5 py-0.5 rounded-full bg-navy-100 text-navy-900 font-bold border border-navy-300 ml-auto">
                 Lokal / Cloud
@@ -123,10 +123,10 @@
             <select id="ai_service_slug" class="w-full px-3.5 py-2 text-xs rounded-lg border border-concrete-300 bg-concrete-50 focus:outline-none focus:ring-2 focus:ring-safety-500">
                 <option value="">-- Umum (tanpa program spesifik) --</option>
                 @foreach($programs as $program)
-                    <option value="{{ $program['slug'] }}">{{ $program['title'] }}</option>
+                    <option value="{{ $program['slug'] }}">[{{ $program['category'] === 'training' ? 'Pelatihan · ' . $program['category_label'] : 'Layanan · ' . $program['category_label'] }}] {{ $program['title'] }}</option>
                 @endforeach
             </select>
-            <p class="text-[10px] text-concrete-500">Bila dipilih, artikel akan terkonsentrasi pada lingkup program terkait.</p>
+            <p class="text-[10px] text-concrete-500">Topik pelatihan dan layanan dibedakan pada daftar. Artikel tetap mengikuti judul katalog yang dipilih.</p>
         </div>
 
         <div class="flex items-center justify-between pt-2">
@@ -211,7 +211,7 @@
                             name="title"
                             required
                             value="{{ old('title') }}"
-                            placeholder="Contoh: Panduan Skema Kompetensi pertambangan dan energi di Surabaya"
+                            placeholder="Contoh: Panduan Skema Kompetensi pelatihan teknis dan industri di Surabaya"
                             class="w-full px-3.5 py-2.5 text-sm font-bold rounded-lg border border-concrete-300 focus:outline-none focus:ring-2 focus:ring-safety-500"
                         >
                     </div>
@@ -226,7 +226,7 @@
                             id="slug"
                             name="slug"
                             value="{{ old('slug') }}"
-                            placeholder="panduan-skema-kompetensi-pertambangan dan energi..."
+                            placeholder="panduan-skema-kompetensi-pelatihan teknis dan industri..."
                             class="w-full px-3.5 py-2 text-xs font-mono rounded-lg border border-concrete-300 bg-concrete-50 focus:outline-none focus:ring-2 focus:ring-safety-500"
                         >
                     </div>
@@ -433,7 +433,7 @@
 document.addEventListener('DOMContentLoaded', function () {
     // 1. Inisialisasi Jodit Editor
     const editor = Jodit.make('#content_editor', {
-        placeholder: 'Tulis konten artikel edukasi pertambangan dan energi di sini...',
+        placeholder: 'Tulis konten artikel artikel teknis di sini...',
         height: 480,
         toolbarAdaptive: false,
         uploader: {

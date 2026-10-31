@@ -70,7 +70,7 @@ class PublicArticleTest extends TestCase
     {
         $response = $this->get(route('articles.index'));
         $response->assertOk();
-        $response->assertSee('Artikel & Panduan ' . config('app.name', 'Najkaltare'));
+        $response->assertSee('Artikel & Panduan ' . config('app.name', 'Chifheto'));
     }
 
     // ─── Show Tests ───────────────────────────────────────────────────────────
@@ -82,6 +82,17 @@ class PublicArticleTest extends TestCase
         $this->get(route('articles.show', $article->slug))
             ->assertOk()
             ->assertSee($article->title);
+    }
+
+    public function test_article_region_link_still_opens_the_existing_city_page(): void
+    {
+        $article = $this->publishedArticle(['target_city_slug' => 'bandung']);
+
+        $response = $this->get(route('articles.show', $article->slug));
+        $response->assertOk();
+        $response->assertSee('Wilayah Kota Bandung');
+        $response->assertSee(route('regional.city', 'bandung'), false);
+        $this->get(route('regional.city', 'bandung'))->assertOk();
     }
 
     public function test_article_show_returns_404_for_draft(): void

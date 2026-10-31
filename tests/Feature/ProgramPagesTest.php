@@ -30,6 +30,37 @@ class ProgramPagesTest extends TestCase
         }
     }
 
+    public function test_ayana_training_detail_uses_full_title_specific_editorial_structure(): void
+    {
+        $catalog = app(SchemeService::class);
+        $lubricant = $catalog->trainings();
+        $pelumas = array_values($lubricant)[0] ?? null;
+        $processing = collect($lubricant)->first(fn (array $item) => str_contains(mb_strtolower($item['title']), 'downstream processing'));
+
+        $this->assertNotNull($pelumas);
+        $this->assertNotNull($processing);
+        $response = $this->get(route('program.show', $pelumas['slug']))->assertOk();
+        $response->assertSee($pelumas['title'])
+            ->assertSee('Tujuan &amp; Ruang Lingkup', false)
+            ->assertSee('Kompetensi &amp; Output Kerja', false)
+            ->assertSee('Informasi Penyelenggaraan &amp; Pelaksanaan', false)
+            ->assertSee('Pokok Materi &amp; Tahapan Kerja', false)
+            ->assertSee('Layanan Terkait')
+            ->assertSee('FAQ')
+            ->assertSee('Belum dicantumkan')
+            ->assertSee('bukan kurikulum atau urutan pembelajaran resmi')
+            ->assertSee($pelumas['category_label']);
+        $response->assertDontSee('Najkaltare');
+
+        $other = $this->get(route('program.show', $processing['slug']))->assertOk();
+        $this->assertNotSame($pelumas['title'], $processing['title']);
+        $this->assertNotSame(
+            app(\App\Services\RegionalTrainingContentService::class)->for($pelumas)['overview'],
+            app(\App\Services\RegionalTrainingContentService::class)->for($processing)['overview']
+        );
+        $other->assertSee($processing['title']);
+    }
+
     /**
      * Test canonical and legacy route aliases for programs.
      */
@@ -197,7 +228,8 @@ class ProgramPagesTest extends TestCase
         $home->assertSee(route('catalog.index'), false);
         $this->get(route('catalog.index'))
             ->assertOk()
-            ->assertSee(route('program.show', 'teknisi-pelindian'), false);
+            ->assertSee(route('program.show', 'pelatihan-pengolahan-dan-pemurnian-processing-tambang'), false)
+            ->assertDontSee(route('program.show', 'teknisi-pelindian'), false);
     }
 
     public function test_dedicated_service_slugs_resolve_to_detail_pages(): void

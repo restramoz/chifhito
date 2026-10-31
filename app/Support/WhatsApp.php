@@ -88,10 +88,18 @@ class WhatsApp
      */
     public static function defaultMessage(): string
     {
-        return (string) config(
+        $message = (string) config(
             'services.whatsapp.default_message',
-            'Halo, saya ingin konsultasi mengenai pelatihan dan skema kompetensi pertambangan dan energi.'
+            'Halo, saya ingin konsultasi mengenai program pelatihan profesional Chifheto.'
         );
+
+        // Older deployments may still configure the previous site-wide mining
+        // positioning in .env; retain custom messages otherwise.
+        if (str_contains(mb_strtolower($message), 'skema kompetensi pertambangan')) {
+            return 'Halo, saya ingin konsultasi mengenai program pelatihan profesional Chifheto.';
+        }
+
+        return $message;
     }
 
     /**

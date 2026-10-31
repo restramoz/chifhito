@@ -43,6 +43,15 @@ class WhatsAppTest extends TestCase
         $this->assertEquals('https://wa.me/6281234567890?text=Halo%2C%20saya%20ingin%20konsultasi.', $url);
     }
 
+    public function test_replaces_only_the_legacy_site_wide_mining_default_message(): void
+    {
+        config(['services.whatsapp.default_message' => 'Halo, saya ingin konsultasi mengenai skema kompetensi pertambangan, mineral, batubara, dan energi.']);
+        $this->assertSame('Halo, saya ingin konsultasi mengenai program pelatihan profesional Chifheto.', WhatsApp::defaultMessage());
+
+        config(['services.whatsapp.default_message' => 'Konsultasi pelatihan tambang untuk tim kami.']);
+        $this->assertSame('Konsultasi pelatihan tambang untuk tim kami.', WhatsApp::defaultMessage());
+    }
+
     public function test_url_returns_null_when_phone_is_missing(): void
     {
         config(['services.whatsapp.phone' => '']);

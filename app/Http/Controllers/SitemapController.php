@@ -31,9 +31,8 @@ class SitemapController extends Controller
             'priority' => '0.8',
         ];
 
-        // 2. Catalog schemes
-        $programs = $schemes->all();
-        foreach ($programs as $slug => $item) {
+        // 2. Training detail URLs from the authoritative Ayana catalog only.
+        foreach ($schemes->trainings() as $slug => $item) {
             $urls[] = [
                 'loc' => route('program.show', $slug),
                 'lastmod' => now()->toAtomString(),

@@ -10,12 +10,12 @@ class WhatsAppConversionFlowTest extends TestCase
     public function test_homepage_ctas_use_configured_phone_and_default_message(): void
     {
         config(['services.whatsapp.phone' => '081299887766']);
-        config(['services.whatsapp.default_message' => 'Halo, saya ingin konsultasi mengenai pelatihan dan skema kompetensi pertambangan dan energi.']);
+        config(['services.whatsapp.default_message' => 'Halo, saya ingin konsultasi mengenai program pelatihan profesional Chifheto.']);
 
         $response = $this->get('/');
         $response->assertStatus(200);
 
-        $expectedUrl = 'https://wa.me/6281299887766?text=' . rawurlencode('Halo, saya ingin konsultasi mengenai pelatihan dan skema kompetensi pertambangan dan energi.');
+        $expectedUrl = 'https://wa.me/6281299887766?text=' . rawurlencode('Halo, saya ingin konsultasi mengenai program pelatihan profesional Chifheto.');
 
         // Hero CTA, Header CTA, Footer CTA, and Floating CTA should all include this URL
         $response->assertSee($expectedUrl, false);
@@ -24,7 +24,7 @@ class WhatsAppConversionFlowTest extends TestCase
     public function test_homepage_ctas_render_non_link_contact_text_when_phone_is_missing(): void
     {
         config(['services.whatsapp.phone' => '']);
-        config(['services.whatsapp.default_message' => 'Halo, saya ingin konsultasi mengenai pelatihan dan skema kompetensi pertambangan dan energi.']);
+        config(['services.whatsapp.default_message' => 'Halo, saya ingin konsultasi mengenai program pelatihan profesional Chifheto.']);
 
         $response = $this->get('/');
         $response->assertStatus(200);
@@ -57,17 +57,14 @@ class WhatsAppConversionFlowTest extends TestCase
         $responseShort->assertDontSee('https://wa.me/123', false);
     }
 
-    public function test_all_program_cards_on_homepage_produce_program_specific_messages(): void
+    public function test_program_detail_uses_program_specific_whatsapp_message(): void
     {
         config(['services.whatsapp.phone' => '081299887766']);
 
-        $response = $this->get('/');
+        $scheme = app(SchemeService::class)->find('teknisi-pelindian');
+        $response = $this->get(route('program.show', 'teknisi-pelindian'));
         $response->assertStatus(200);
-
-        $schemes = array_slice(app(SchemeService::class)->all(), 0, 3, true);
-        foreach ($schemes as $scheme) {
-            $response->assertSee('https://wa.me/6281299887766?text=' . rawurlencode($scheme['wa_message']), false);
-        }
+        $response->assertSee('https://wa.me/6281299887766?text=' . rawurlencode($scheme['wa_message']), false);
     }
 
     public function test_all_whatsapp_ctas_use_the_same_configuration_source(): void

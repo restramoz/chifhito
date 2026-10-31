@@ -1,16 +1,12 @@
-<header class="sticky top-0 z-30 bg-[#111318]/95 backdrop-blur-md border-b border-white/10 shadow-md">
+<header class="ch-site-header sticky top-0 z-30">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex items-center justify-between h-16 sm:h-20 gap-4">
             <!-- Brand -->
-            <a href="{{ route('home') }}" class="group flex items-center gap-3 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00C2A8] focus-visible:ring-offset-2 focus-visible:ring-offset-[#111318] rounded-lg p-1 min-w-0" aria-label="{{ config('app.name', 'Najkaltare') }} - Beranda">
-                <span class="w-10 h-10 shrink-0 rounded-xl bg-[#252932] border border-[#00C2A8]/30 flex items-center justify-center transition-colors group-hover:border-[#00C2A8]">
-                    <svg class="w-5 h-5 text-[#00C2A8]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                        <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
-                    </svg>
-                </span>
+            <a href="{{ route('home') }}" class="group flex items-center gap-3 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00C2A8] focus-visible:ring-offset-2 focus-visible:ring-offset-[#111318] rounded-lg p-1 min-w-0" aria-label="{{ config('app.name', 'Chifheto') }} - Beranda">
+                <span class="ch-brand-mark" aria-hidden="true">C.</span>
                 <span class="flex flex-col min-w-0">
-                    <span class="text-base sm:text-lg font-black tracking-tight text-white truncate group-hover:text-[#00C2A8] transition-colors">{{ config('app.name', 'Najkaltare') }}</span>
-                    <span class="hidden sm:block text-[11px] text-[#A0AAB8] font-medium truncate">Katalog Layanan &amp; Pelatihan Industri</span>
+                    <span class="text-base sm:text-lg font-black tracking-tight text-white truncate group-hover:text-[#00C2A8] transition-colors">{{ config('app.name', 'Chifheto') }}</span>
+                    <span class="hidden sm:block text-[11px] text-[#A0AAB8] font-medium truncate">Pelatihan teknis &amp; profesional</span>
                 </span>
             </a>
 
@@ -18,10 +14,9 @@
             <nav class="hidden lg:flex items-center gap-7" role="navigation" aria-label="Navigasi Utama Desktop">
                 @foreach ([
                     ['Beranda', route('home')],
-                    ['Layanan', route('home') . '#layanan'],
+                    ['Katalog', route('catalog.index')],
                     ['Artikel', route('articles.index')],
                     ['Wilayah', route('home') . '#wilayah'],
-                    ['Keunggulan', route('home') . '#keunggulan'],
                 ] as $item)
                     @php $isHome = $item[0] === 'Beranda' && request()->routeIs('home'); @endphp
                     <a href="{{ $item[1] }}"
@@ -64,10 +59,9 @@
         <div class="flex flex-col space-y-1 pt-2">
             @foreach ([
                 ['Beranda', route('home')],
-                ['Layanan', route('home') . '#layanan'],
+                ['Katalog', route('catalog.index')],
                 ['Artikel', route('articles.index')],
                 ['Wilayah', route('home') . '#wilayah'],
-                ['Keunggulan', route('home') . '#keunggulan'],
             ] as $item)
                 <a href="{{ $item[1] }}" class="mobile-nav-link text-base font-semibold text-[#E2E8F0] hover:text-[#00C2A8] hover:bg-white/5 px-3 py-2.5 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00C2A8]">
                     {{ $item[0] }}

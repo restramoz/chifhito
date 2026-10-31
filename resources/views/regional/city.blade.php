@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
-@section('title', 'Skema Kompetensi ' . config('app.name', 'Najkaltare') . ' di ' . $city['name'] . ' — Konsultasi Resmi')
-@section('meta_description', 'Informasi skema kompetensi dan program pelatihan ' . config('app.name', 'Najkaltare') . ' untuk wilayah ' . $city['name'] . ', Provinsi ' . $city['province'] . '.')
+@section('title', 'Skema Kompetensi ' . config('app.name', 'Chifheto') . ' di ' . $city['name'] . ' — Konsultasi Resmi')
+@section('meta_description', 'Informasi skema kompetensi dan program pelatihan ' . config('app.name', 'Chifheto') . ' untuk wilayah ' . $city['name'] . ', Provinsi ' . $city['province'] . '.')
 @section('wa_message', $waMessage)
 
 @section('content')
@@ -29,17 +29,17 @@
             <div class="max-w-3xl">
                 <!-- Mobile hero image - Responsive with aspect-ratio -->
                 <div class="lg:hidden mb-5 -mx-4 sm:-mx-6 lg:-mx-8">
-                    <img src="/images/home/feature-lineworker-ppe.jpg" alt="Aktivitas {{ config('app.name', 'Najkaltare') }} di {{ $city['name'] }}" width="1600" height="900" loading="eager" fetchpriority="high" decoding="async" class="hero-image-mobile w-full object-cover object-center rounded-xl" />
+                    <img src="/images/home/hero-industrial.jpg" alt="Aktivitas {{ config('app.name', 'Chifheto') }} di {{ $city['name'] }}" width="1600" height="900" loading="eager" fetchpriority="high" decoding="async" class="hero-image-mobile w-full object-cover object-center rounded-xl" />
                 </div>
                 <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-burnt-brick border border-burnt-brick/80 text-white text-xs sm:text-sm font-semibold mb-5 shadow-sm">
                     <span class="w-2 h-2 rounded-full bg-safety-orange animate-pulse"></span>
                     Skema Kompetensi &amp; Layanan Konsultasi
                 </div>
                 <h1 id="city-hero-heading" class="font-extrabold tracking-tight text-white leading-tight uppercase text-[clamp(1.75rem,4.5vw,2.5rem)] sm:text-[clamp(2rem,5vw,3rem)] lg:text-[clamp(2.25rem,4.5vw,3.5rem)]">
-                    Skema Kompetensi {{ config('app.name', 'Najkaltare') }}<br><span class="text-safety-orange">{{ $city['name'] }}</span>
+                    Skema Kompetensi {{ config('app.name', 'Chifheto') }}<br><span class="text-safety-orange">{{ $city['name'] }}</span>
                 </h1>
                 <p class="mt-6 text-base sm:text-lg text-neutral-200 leading-relaxed">
-                    Informasi skema kompetensi dan program pelatihan {{ config('app.name', 'Najkaltare') }} bagi badan usaha dan fasilitas produksi di <strong class="text-white">{{ $city['name'] }}</strong>, Provinsi {{ $city['province'] }}.
+                    Informasi skema kompetensi dan program pelatihan {{ config('app.name', 'Chifheto') }} bagi badan usaha dan fasilitas produksi di <strong class="text-white">{{ $city['name'] }}</strong>, Provinsi {{ $city['province'] }}.
                 </p>
                 <div class="mt-7 flex flex-col sm:flex-row gap-3 sm:gap-4 w-full">
                     <x-wa-cta variant="primary" size="lg" :message="$waMessage" label="Konsultasi Wilayah {{ $city['name'] }}" class="w-full sm:w-auto bg-safety-orange hover:bg-burnt-brick text-industry-black hover:text-white font-bold shadow-lg" />
@@ -48,7 +48,7 @@
                     <div class="min-w-0"><div class="text-[10px] sm:text-xs text-neutral-400 uppercase tracking-wider">Provinsi</div><div class="text-sm sm:text-base font-extrabold text-white mt-0.5 truncate">{{ $city['province'] }}</div></div>
                     <div class="min-w-0"><div class="text-[10px] sm:text-xs text-neutral-400 uppercase tracking-wider">Pulau</div><div class="text-sm sm:text-base font-extrabold text-safety-orange mt-0.5">{{ $city['island'] }}</div></div>
                     <div class="min-w-0"><div class="text-[10px] sm:text-xs text-neutral-400 uppercase tracking-wider">Layanan</div><div class="text-sm sm:text-base font-extrabold text-white mt-0.5">{{ count($programs) }} Skema</div></div>
-                    <div class="min-w-0"><div class="text-[10px] sm:text-xs text-neutral-400 uppercase tracking-wider">Lingkup</div><div class="text-sm sm:text-base font-extrabold text-safety-orange mt-0.5">{{ config('app.name', 'Najkaltare') }}</div></div>
+                    <div class="min-w-0"><div class="text-[10px] sm:text-xs text-neutral-400 uppercase tracking-wider">Lingkup</div><div class="text-sm sm:text-base font-extrabold text-safety-orange mt-0.5">{{ config('app.name', 'Chifheto') }}</div></div>
                 </div>
             </div>
         </div>
@@ -136,7 +136,7 @@
             <h2 id="city-article-heading" class="text-2xl font-extrabold text-industry-black mb-2">
                 Artikel &amp; Panduan di {{ $city['name'] }}
             </h2>
-            <p class="text-sm text-dark-mahogany mb-8">Kumpulan artikel edukatif terkait skema kompetensi dan layanan {{ config('app.name', 'Najkaltare') }} untuk wilayah {{ $city['name'] }}.</p>
+            <p class="text-sm text-dark-mahogany mb-8">Kumpulan artikel edukatif terkait skema kompetensi dan layanan {{ config('app.name', 'Chifheto') }} untuk wilayah {{ $city['name'] }}.</p>
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 @foreach($articles as $art)
                 <a href="{{ route('articles.show', $art->slug) }}" class="group flex flex-col bg-white rounded-xl border border-neutral-200 hover:border-burnt-brick hover:shadow-md transition-all overflow-hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-burnt-brick">
@@ -202,7 +202,7 @@
                 @foreach([
                     [
                         'q' => 'Apakah layanan konsultasi dan skema kompetensi menjangkau ' . $city['name'] . '?',
-                        'a' => 'Ya, katalog skema kompetensi ' . config('app.name', 'Najkaltare') . ' disajikan pada halaman ini, dan layanan konsultasi untuk ' . $city['name'] . ' dapat dikonfirmasi langsung melalui WhatsApp.',
+                        'a' => 'Ya, katalog skema kompetensi ' . config('app.name', 'Chifheto') . ' disajikan pada halaman ini, dan layanan konsultasi untuk ' . $city['name'] . ' dapat dikonfirmasi langsung melalui WhatsApp.',
                     ],
                     [
                         'q' => 'Bagaimana cara menentukan skema yang tepat untuk instansi kami?',
@@ -232,10 +232,10 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
             <div class="max-w-3xl mx-auto">
                 <h2 id="city-cta-heading" class="text-2xl sm:text-3xl font-extrabold uppercase tracking-tight">
-                    Konsultasi Program {{ config('app.name', 'Najkaltare') }}<br><span class="text-safety-orange">{{ $city['name'] }}</span>
+                    Konsultasi Program {{ config('app.name', 'Chifheto') }}<br><span class="text-safety-orange">{{ $city['name'] }}</span>
                 </h2>
                 <p class="mt-4 text-base text-neutral-200 leading-relaxed">
-                    Hubungi kami untuk informasi skema kompetensi, proposal resmi, jadwal peserta, atau rekomendasi program {{ config('app.name', 'Najkaltare') }}.
+                    Hubungi kami untuk informasi skema kompetensi, proposal resmi, jadwal peserta, atau rekomendasi program {{ config('app.name', 'Chifheto') }}.
                 </p>
                 <div class="mt-7 flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 w-full">
                     <x-wa-cta variant="primary" size="lg" :message="$waMessage" label="Konsultasi Sekarang" class="w-full sm:w-auto bg-safety-orange hover:bg-burnt-brick text-industry-black hover:text-white font-bold shadow-lg" />

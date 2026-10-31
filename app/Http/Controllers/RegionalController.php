@@ -22,11 +22,11 @@ class RegionalController extends Controller
 
         abort_if($province === null, 404, 'Provinsi tidak ditemukan.');
 
-        $waMessage = "Halo, saya dari Provinsi {$province['name']} dan ingin konsultasi mengenai skema kompetensi pertambangan dan energi.";
+        $waMessage = "Halo, saya dari Provinsi {$province['name']} dan ingin konsultasi mengenai pelatihan teknis dan industri.";
 
         return view('regional.province', [
             'province' => $province,
-            'programs' => $this->schemes->all(),
+            'programs' => $this->schemes->trainings(),
             'waMessage' => $waMessage,
         ]);
     }
@@ -57,12 +57,12 @@ class RegionalController extends Controller
                 ->get();
         }
 
-        $waMessage = "Halo, saya dari {$city['name']} dan ingin konsultasi mengenai skema kompetensi pertambangan dan energi.";
+        $waMessage = "Halo, saya dari {$city['name']} dan ingin konsultasi mengenai pelatihan teknis dan industri.";
 
         return view('regional.city', [
             'city' => $city,
             'nearbyCities' => $nearbyCities,
-            'programs' => $this->schemes->all(),
+            'programs' => $this->schemes->trainings(),
             'articles' => $articles,
             'waMessage' => $waMessage,
         ]);
@@ -94,11 +94,11 @@ class RegionalController extends Controller
                 ->get();
         }
 
-        $waMessage = "Halo, saya dari Kecamatan {$district['name']}, {$district['city_name']} dan ingin konsultasi mengenai skema kompetensi pertambangan dan energi.";
+        $waMessage = "Halo, saya dari Kecamatan {$district['name']}, {$district['city_name']} dan ingin konsultasi mengenai pelatihan teknis dan industri.";
 
         return view('regional.district', [
             'district' => $district,
-            'programs' => $this->schemes->all(),
+            'programs' => $this->schemes->trainings(),
             'articles' => $articles,
             'waMessage' => $waMessage,
         ]);

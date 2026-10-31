@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('title', $program['title'] . ' — ' . $city['name'])
-@section('meta_description', 'Informasi dan konsultasi ' . $program['title'] . ' untuk mitra ' . config('app.name', 'Najkaltare') . ', fasilitas produksi, dan tenaga profesional di ' . $city['name'] . ', Provinsi ' . $city['province'] . '. Rincian skema, unit kompetensi, dan persyaratan penyelenggaraan.')
+@section('meta_description', 'Informasi dan konsultasi ' . $program['title'] . ' untuk mitra ' . config('app.name', 'Chifheto') . ', fasilitas produksi, dan tenaga profesional di ' . $city['name'] . ', Provinsi ' . $city['province'] . '. Rincian skema, unit kompetensi, dan persyaratan penyelenggaraan.')
 @section('wa_message', $waMessage)
 
 @section('content')
@@ -68,7 +68,7 @@
                     </div>
                     <div>
                         <div class="text-xs font-semibold uppercase tracking-wider text-neutral-400">Sektor</div>
-                        <div class="text-lg sm:text-xl font-extrabold text-safety-orange mt-0.5">{{ config('app.name', 'Najkaltare') }}</div>
+                        <div class="text-lg sm:text-xl font-extrabold text-safety-orange mt-0.5">{{ config('app.name', 'Chifheto') }}</div>
                     </div>
                     <div>
                         <div class="text-xs font-semibold uppercase tracking-wider text-neutral-400">Sifat Program</div>
@@ -104,7 +104,7 @@
                                 </svg>
                             </div>
                             <div class="text-sm text-dark-mahogany leading-relaxed">
-                                <span class="font-bold text-industry-black block mb-0.5">Fokus Keselamatan Kerja {{ config('app.name', 'Najkaltare') }}</span>
+                                <span class="font-bold text-industry-black block mb-0.5">Fokus Keselamatan Kerja {{ config('app.name', 'Chifheto') }}</span>
                                 Program diarahkan pada pemahaman skema kompetensi, praktik kerja yang baik, dan pemeliharaan keselamatan kerja pada kegiatan operasional di wilayah {{ $city['name'] }} dan sekitarnya.
                             </div>
                         </div>

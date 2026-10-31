@@ -1,8 +1,8 @@
 
 @extends('layouts.app')
 
-@section('title', 'Skema Kompetensi ' . config('app.name', 'Najkaltare') . ' Provinsi ' . $province['name'] . ' — Konsultasi Resmi')
-@section('meta_description', 'Informasi skema kompetensi dan program pelatihan ' . config('app.name', 'Najkaltare') . ' untuk wilayah Provinsi ' . $province['name'] . '.')
+@section('title', 'Skema Kompetensi ' . config('app.name', 'Chifheto') . ' Provinsi ' . $province['name'] . ' — Konsultasi Resmi')
+@section('meta_description', 'Informasi skema kompetensi dan program pelatihan ' . config('app.name', 'Chifheto') . ' untuk wilayah Provinsi ' . $province['name'] . '.')
 @section('wa_message', $waMessage)
 
 @section('content')
@@ -35,8 +35,8 @@
                 {{-- Mobile hero image --}}
                 <div class="lg:hidden mb-5 -mx-4 sm:-mx-6">
                     <img
-                        src="/images/home/feature-lineworker-ppe.jpg"
-                        alt="Aktivitas {{ config('app.name', 'Najkaltare') }} di Provinsi {{ $province['name'] }}"
+                        src="/images/home/hero-industrial.jpg"
+                        alt="Aktivitas {{ config('app.name', 'Chifheto') }} di Provinsi {{ $province['name'] }}"
                         width="1600"
                         height="900"
                         loading="eager"
@@ -55,12 +55,12 @@
                     class="font-extrabold tracking-tight text-white leading-tight uppercase text-[clamp(1.75rem,4.5vw,2.5rem)] sm:text-[clamp(2rem,5vw,3rem)] lg:text-[clamp(2.25rem,4.5vw,3.5rem)]">
                     Skema Kompetensi<br>
                     <span class="text-safety-orange">
-                        {{ config('app.name', 'Najkaltare') }} Provinsi {{ $province['name'] }}
+                        {{ config('app.name', 'Chifheto') }} Provinsi {{ $province['name'] }}
                     </span>
                 </h1>
 
                 <p class="mt-6 text-base sm:text-lg text-neutral-200 leading-relaxed">
-                    Pusat informasi skema kompetensi dan program pelatihan {{ config('app.name', 'Najkaltare') }} untuk badan usaha,
+                    Pusat informasi skema kompetensi dan program pelatihan {{ config('app.name', 'Chifheto') }} untuk badan usaha,
                     fasilitas produksi, dan mitra industri di
                     <strong class="text-white">Provinsi {{ $province['name'] }}</strong>.
                 </p>
@@ -100,7 +100,7 @@
                     <div class="min-w-0">
                         <div class="text-[10px] sm:text-xs text-neutral-400 uppercase tracking-wider">Lingkup</div>
                         <div class="text-sm sm:text-base font-extrabold text-safety-orange mt-0.5">
-                            {{ config('app.name', 'Najkaltare') }}
+                            {{ config('app.name', 'Chifheto') }}
                         </div>
                     </div>
                 </div>
@@ -149,7 +149,7 @@
                 </h2>
 
                 <p class="mt-3 text-sm sm:text-base text-dark-mahogany leading-relaxed">
-                    Pilih program pelatihan {{ config('app.name', 'Najkaltare') }} sesuai kebutuhan organisasi Anda.
+                    Pilih program pelatihan {{ config('app.name', 'Chifheto') }} sesuai kebutuhan organisasi Anda.
                     Gunakan tombol di bawah untuk melihat seluruh layanan yang tersedia.
                 </p>
             </div>
@@ -167,7 +167,7 @@
                         class="province-program-item {{ $loop->index >= $initialProgramLimit ? 'hidden' : '' }}"
                         @if ($loop->index >= $initialProgramLimit) hidden @endif>
 
-                        <a href="{{ route('program.show', $prog['slug']) }}"
+                        <a href="{{ route('regional.province.program', ['province' => $province['slug'], 'program' => $prog['slug']]) }}"
                             class="group h-full flex flex-col bg-white rounded-xl border border-neutral-200 hover:border-burnt-brick hover:shadow-md transition-all overflow-hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-burnt-brick">
 
                             <div class="h-1.5 bg-safety-orange"></div>
@@ -183,7 +183,7 @@
                                 </h3>
 
                                 <p class="text-xs sm:text-sm text-dark-mahogany flex-1 leading-relaxed line-clamp-3">
-                                    {{ $prog['hero_subheading'] ?? ('Informasi program pelatihan dan konsultasi ' . config('app.name', 'Najkaltare') . '.') }}
+                                    {{ $prog['hero_subheading'] ?? ('Informasi program pelatihan dan konsultasi ' . config('app.name', 'Chifheto') . '.') }}
                                 </p>
 
                                 <div class="mt-4 pt-4 border-t border-neutral-100 text-xs font-bold text-burnt-brick flex items-center justify-between">
@@ -281,7 +281,7 @@
                 @foreach ([
                     [
                         'q' => 'Apakah skema kompetensi dan layanan konsultasi tersedia untuk wilayah Provinsi ' . $province['name'] . '?',
-                        'a' => 'Ya, halaman ini menyajikan skema kompetensi ' . config('app.name', 'Najkaltare') . ' yang tersedia. Layanan konsultasi dapat dikonfirmasi untuk kota dan kabupaten di Provinsi ' . $province['name'] . '.',
+                        'a' => 'Ya, halaman ini menyajikan skema kompetensi ' . config('app.name', 'Chifheto') . ' yang tersedia. Layanan konsultasi dapat dikonfirmasi untuk kota dan kabupaten di Provinsi ' . $province['name'] . '.',
                     ],
                     [
                         'q' => 'Skema kompetensi apa saja yang tersedia?',
@@ -326,7 +326,7 @@
 
                 <h2 id="prov-cta-heading"
                     class="text-2xl sm:text-3xl font-extrabold uppercase tracking-tight">
-                    Konsultasi Program {{ config('app.name', 'Najkaltare') }}<br>
+                    Konsultasi Program {{ config('app.name', 'Chifheto') }}<br>
                     <span class="text-safety-orange">
                         Provinsi {{ $province['name'] }}
                     </span>

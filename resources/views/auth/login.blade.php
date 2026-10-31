@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
-@section('title', 'Login Administrator — ' . config('app.name', 'Najkaltare'))
-@section('meta_description', 'Masuk ke panel manajemen administrator ' . config('app.name', 'Najkaltare') . '.')
+@section('title', 'Login Administrator — ' . config('app.name', 'Chifheto'))
+@section('meta_description', 'Masuk ke panel manajemen administrator ' . config('app.name', 'Chifheto') . '.')
 
 @section('content')
 <div class="min-h-[75vh] flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 bg-neutral-50">
@@ -18,7 +18,7 @@
                 Admin Panel Login
             </h1>
             <p class="text-xs text-dark-mahogany">
-                Akses terbatas untuk administrator {{ config('app.name', 'Najkaltare') }}
+                Akses terbatas untuk administrator {{ config('app.name', 'Chifheto') }}
             </p>
         </div>
 

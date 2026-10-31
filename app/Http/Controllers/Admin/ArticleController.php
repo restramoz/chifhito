@@ -51,7 +51,7 @@ class ArticleController extends Controller
     public function create(RegionalService $regionalService, SchemeService $schemeService): View
     {
         $cities = $regionalService->getAllCities();
-        $programs = $schemeService->all();
+        $programs = $schemeService->trainings();
 
         return view('admin.articles.create', compact('cities', 'programs'));
     }
@@ -306,7 +306,7 @@ class ArticleController extends Controller
             'word_count' => 'required|integer|min:6000|max:9000',
             'topic' => 'nullable|string|max:255',
             // Optional service-aware generation: must reference a catalog entry.
-            'service_slug' => ['nullable', 'string', Rule::in(array_keys($this->schemes->all()))],
+            'service_slug' => ['nullable', 'string', Rule::in(array_keys($this->schemes->trainings()))],
         ]);
 
         $city = $regionalService->findCity($validated['city_slug']);

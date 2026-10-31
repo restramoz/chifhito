@@ -93,7 +93,11 @@ class AiGenerateArticleTest extends TestCase
         $admin = User::factory()->create(['is_admin' => true]);
         $this->bindFakeRegional(['name' => 'Test City', 'slug' => 'some-city']);
 
-        $serviceSlugs = ['sia', 'slo', 'slf', 'riksa-uji'];
+        $serviceSlugs = [
+            'pelatihan-pengolahan-dan-pemurnian-processing-tambang',
+            'teknik-benefisiasi-tambang',
+            'storage-tank-oil-gas',
+        ];
         $ollama = $this->createMock(OllamaService::class);
         $ollama->expects($this->exactly(count($serviceSlugs)))
             ->method('generateArticle')

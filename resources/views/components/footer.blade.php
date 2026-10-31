@@ -4,18 +4,14 @@
             <!-- Identity -->
             <div class="space-y-4">
                 <div class="flex items-center gap-3">
-                    <span class="w-10 h-10 shrink-0 rounded-xl bg-[#252932] border border-[#00C2A8]/30 flex items-center justify-center">
-                        <svg class="w-5 h-5 text-[#00C2A8]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                            <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
-                        </svg>
-                    </span>
+                    <span class="ch-brand-mark" aria-hidden="true">C.</span>
                     <span class="flex flex-col min-w-0">
-                        <span class="text-base font-extrabold text-white tracking-tight truncate">{{ config('app.name', 'Najkaltare') }}</span>
-                        <span class="text-[11px] text-[#A0AAB8] font-medium">Layanan &amp; Pelatihan Industri</span>
+                        <span class="text-base font-extrabold text-white tracking-tight truncate">{{ config('app.name', 'Chifheto') }}</span>
+                        <span class="text-[11px] text-[#A0AAB8] font-medium">Pelatihan profesional</span>
                     </span>
                 </div>
                 <p class="text-sm text-[#A0AAB8] leading-relaxed">
-                    Katalog layanan dan pelatihan profesional {{ config('app.name', 'Najkaltare') }} mencakup beragam kategori kompetensi industri terpadu untuk mendukung kebutuhan dunia usaha dan tenaga kerja nasional.
+                    Referensi pelatihan profesional untuk bidang teknis dan industri. Telusuri katalog berdasarkan topik, lalu bicarakan kebutuhan tim Anda.
                 </p>
             </div>
 
@@ -24,11 +20,9 @@
                 <h3 class="text-xs font-bold text-[#00C2A8] uppercase tracking-wider mb-4">Navigasi Utama</h3>
                 <ul class="space-y-2.5 text-sm text-[#C7CBD2]" role="list">
                     <li><a href="{{ route('home') }}" class="hover:text-[#00C2A8] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00C2A8] rounded">Beranda</a></li>
-                    <li><a href="{{ route('home') }}#layanan" class="hover:text-[#00C2A8] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00C2A8] rounded">Katalog Layanan</a></li>
+                    <li><a href="{{ route('catalog.index') }}" class="hover:text-[#00C2A8] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00C2A8] rounded">Katalog Pelatihan</a></li>
                     <li><a href="{{ route('articles.index') }}" class="hover:text-[#00C2A8] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00C2A8] rounded">Artikel &amp; Wawasan</a></li>
-                    <li><a href="{{ route('home') }}#keunggulan" class="hover:text-[#00C2A8] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00C2A8] rounded">Tentang Layanan</a></li>
-                    <li><a href="{{ route('home') }}#wilayah" class="hover:text-[#00C2A8] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00C2A8] rounded">Direktori Wilayah</a></li>
-                    <li><a href="{{ route('home') }}#kontak" class="hover:text-[#00C2A8] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00C2A8] rounded">Kontak Konsultasi</a></li>
+                    <li><a href="{{ route('home') }}#kategori" class="hover:text-[#00C2A8] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00C2A8] rounded">Bidang pelatihan</a></li>
                 </ul>
             </nav>
 
@@ -43,7 +37,7 @@
         </div>
 
         <div class="mt-12 pt-6 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-[#8E97A4]">
-            <p>&copy; {{ date('Y') }} {{ config('app.name', 'Najkaltare') }}. Seluruh hak cipta dilindungi.</p>
+            <p>&copy; {{ date('Y') }} {{ config('app.name', 'Chifheto') }}. Seluruh hak cipta dilindungi.</p>
             <p>Konsultasikan kebutuhan spesifik Anda bersama tim profesional kami.</p>
         </div>
     </div>

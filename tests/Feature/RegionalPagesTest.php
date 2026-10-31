@@ -46,7 +46,7 @@ class RegionalPagesTest extends TestCase
 
         $response->assertStatus(200);
         $response->assertSee('Provinsi Jawa Barat');
-        $response->assertSee('Teknisi Pelindian');
+        $response->assertSee('Pelatihan Pengolahan dan Pemurnian (Processing) Tambang');
         $response->assertSee('Kabupaten &amp; Kota di Provinsi Jawa Barat', false);
 
         // Breadcrumb
@@ -54,18 +54,16 @@ class RegionalPagesTest extends TestCase
         $response->assertSee('Jawa Barat');
 
         // Program cards link to canonical program pages
-        $response->assertSee(route('program.show', 'teknisi-pelindian'), false);
-        $response->assertSee(route('program.show', 'teknisi-pelindian'), false);
-        $response->assertSee(route('program.show', 'teknisi-pelindian'), false);
+        $response->assertSee(route('regional.province.program', ['province' => 'jawa-barat', 'program' => 'pelatihan-pengolahan-dan-pemurnian-processing-tambang']), false);
 
         // Program cards render full canonical names
-        $response->assertSee('Teknisi Pelindian');
-        $response->assertSee('Teknisi Pelindian');
-        $response->assertSee('Teknisi Pelindian', false);
+        $response->assertSee('Pelatihan Pengolahan dan Pemurnian (Processing) Tambang');
+        $response->assertSee('Pelatihan Pengolahan dan Pemurnian (Processing) Tambang');
+        $response->assertSee('Pelatihan Pengolahan dan Pemurnian (Processing) Tambang', false);
 
         // WhatsApp CTA uses the central config and an agricultural message
         $response->assertSee('wa.me', false);
-        $response->assertSee(rawurlencode('Halo, saya dari Provinsi Jawa Barat dan ingin konsultasi mengenai skema kompetensi pertambangan dan energi.'), false);
+        $response->assertSee(rawurlencode('Halo, saya dari Provinsi Jawa Barat dan ingin konsultasi mengenai pelatihan teknis dan industri.'), false);
 
         // Province must be indexable (no "noindex")
         $response->assertDontSee('content="noindex');
@@ -81,9 +79,7 @@ class RegionalPagesTest extends TestCase
         foreach (['jawa-barat', 'jawa-timur', 'dki-jakarta'] as $slug) {
             $response = $this->get(route('regional.province', $slug));
             $response->assertStatus(200);
-            $response->assertSee(route('program.show', 'teknisi-pelindian'), false);
-            $response->assertSee(route('program.show', 'teknisi-pelindian'), false);
-            $response->assertSee(route('program.show', 'teknisi-pelindian'), false);
+            $response->assertSee(route('regional.province.program', ['province' => $slug, 'program' => 'pelatihan-pengolahan-dan-pemurnian-processing-tambang']), false);
         }
     }
 
@@ -116,18 +112,18 @@ class RegionalPagesTest extends TestCase
         $response->assertSee(route('regional.province', 'jawa-barat'), false);
 
         // Programs with full titles personalized for city
-        $response->assertSee('Teknisi Pelindian — Kota Bandung');
-        $response->assertSee('Teknisi Pelindian — Kota Bandung');
-        $response->assertSee('Teknisi Pelindian — Kota Bandung', false);
+        $response->assertSee('Pelatihan Pengolahan dan Pemurnian (Processing) Tambang — Kota Bandung');
+        $response->assertSee('Pelatihan Pengolahan dan Pemurnian (Processing) Tambang — Kota Bandung');
+        $response->assertSee('Pelatihan Pengolahan dan Pemurnian (Processing) Tambang — Kota Bandung', false);
 
         // Program cards link to city-scoped program detail pages
-        $response->assertSee(route('city.program.detail', ['city' => 'bandung', 'program' => 'teknisi-pelindian']), false);
-        $response->assertSee(route('city.program.detail', ['city' => 'bandung', 'program' => 'teknisi-pelindian']), false);
-        $response->assertSee(route('city.program.detail', ['city' => 'bandung', 'program' => 'teknisi-pelindian']), false);
+        $response->assertSee(route('city.program.detail', ['city' => 'bandung', 'program' => 'pelatihan-pengolahan-dan-pemurnian-processing-tambang']), false);
+        $response->assertSee(route('city.program.detail', ['city' => 'bandung', 'program' => 'pelatihan-pengolahan-dan-pemurnian-processing-tambang']), false);
+        $response->assertSee(route('city.program.detail', ['city' => 'bandung', 'program' => 'pelatihan-pengolahan-dan-pemurnian-processing-tambang']), false);
 
         // WhatsApp CTA uses the central config and an agricultural message
         $response->assertSee('wa.me', false);
-        $response->assertSee(rawurlencode('Halo, saya dari Kota Bandung dan ingin konsultasi mengenai skema kompetensi pertambangan dan energi.'), false);
+        $response->assertSee(rawurlencode('Halo, saya dari Kota Bandung dan ingin konsultasi mengenai pelatihan teknis dan industri.'), false);
 
         // Disclaimer / No-invented-locations policy
         $response->assertSee('Catatan penting:', false);
@@ -184,21 +180,19 @@ class RegionalPagesTest extends TestCase
         $response->assertSee(route('regional.city', 'bandung'), false);
 
         // Programs with full titles personalized for district (district pages show program title only)
-        $response->assertSee('Teknisi Pelindian');
-        $response->assertSee('Teknisi Pelindian');
-        $response->assertSee('Teknisi Pelindian', false);
+        $response->assertSee('Pelatihan Pengolahan dan Pemurnian (Processing) Tambang');
+        $response->assertSee('Pelatihan Pengolahan dan Pemurnian (Processing) Tambang');
+        $response->assertSee('Pelatihan Pengolahan dan Pemurnian (Processing) Tambang', false);
 
-        // Programs link to city-scoped program detail
-        $response->assertSee(route('city.program.detail', ['city' => 'bandung', 'program' => 'teknisi-pelindian']), false);
-        $response->assertSee(route('city.program.detail', ['city' => 'bandung', 'program' => 'teknisi-pelindian']), false);
-        $response->assertSee(route('city.program.detail', ['city' => 'bandung', 'program' => 'teknisi-pelindian']), false);
+        // Programs link to district-scoped training details.
+        $response->assertSee(route('regional.district.program', ['citySlug' => 'bandung', 'districtSlug' => 'coblong', 'program' => 'pelatihan-pengolahan-dan-pemurnian-processing-tambang']), false);
 
         // Sibling districts navigation
         $response->assertSee('Kecamatan Lain di Kota Bandung');
 
         // WhatsApp CTA uses the central config and an agricultural message
         $response->assertSee('wa.me', false);
-        $response->assertSee(rawurlencode('Halo, saya dari Kecamatan Coblong, Kota Bandung dan ingin konsultasi mengenai skema kompetensi pertambangan dan energi.'), false);
+        $response->assertSee(rawurlencode('Halo, saya dari Kecamatan Coblong, Kota Bandung dan ingin konsultasi mengenai pelatihan teknis dan industri.'), false);
 
         // District pages are thin content and MUST be tagged noindex
         $response->assertSee('<meta name="robots" content="noindex, follow">', false);
@@ -228,23 +222,23 @@ class RegionalPagesTest extends TestCase
         // 1. Province level (e.g. Jawa Timur)
         $provResponse = $this->get(route('regional.province', 'jawa-timur'));
         $provResponse->assertStatus(200);
-        $provResponse->assertSee('Teknisi Pelindian');
-        $provResponse->assertSee('Teknisi Pelindian');
-        $provResponse->assertSee('Teknisi Pelindian', false);
+        $provResponse->assertSee('Pelatihan Pengolahan dan Pemurnian (Processing) Tambang');
+        $provResponse->assertSee('Pelatihan Pengolahan dan Pemurnian (Processing) Tambang');
+        $provResponse->assertSee('Pelatihan Pengolahan dan Pemurnian (Processing) Tambang', false);
 
         // 2. City level (e.g. Kota Malang)
         $cityResponse = $this->get(route('regional.city', 'malang'));
         $cityResponse->assertStatus(200);
-        $cityResponse->assertSee('Teknisi Pelindian — Kota Malang');
-        $cityResponse->assertSee('Teknisi Pelindian — Kota Malang');
-        $cityResponse->assertSee('Teknisi Pelindian — Kota Malang', false);
+        $cityResponse->assertSee('Pelatihan Pengolahan dan Pemurnian (Processing) Tambang — Kota Malang');
+        $cityResponse->assertSee('Pelatihan Pengolahan dan Pemurnian (Processing) Tambang — Kota Malang');
+        $cityResponse->assertSee('Pelatihan Pengolahan dan Pemurnian (Processing) Tambang — Kota Malang', false);
 
         // 3. District level (e.g. Kecamatan Wagir, Kabupaten Malang)
         $distResponse = $this->get(route('regional.district', ['citySlug' => 'kab-malang', 'districtSlug' => 'wagir']));
         $distResponse->assertStatus(200);
-        $distResponse->assertSee('Teknisi Pelindian');
-        $distResponse->assertSee('Teknisi Pelindian');
-        $distResponse->assertSee('Teknisi Pelindian', false);
+        $distResponse->assertSee('Pelatihan Pengolahan dan Pemurnian (Processing) Tambang');
+        $distResponse->assertSee('Pelatihan Pengolahan dan Pemurnian (Processing) Tambang');
+        $distResponse->assertSee('Pelatihan Pengolahan dan Pemurnian (Processing) Tambang', false);
     }
 
     /**
@@ -268,6 +262,52 @@ class RegionalPagesTest extends TestCase
         // Valid district in wrong city (Coblong is in Bandung, not Surabaya)
         $response2 = $this->get(route('regional.district', ['citySlug' => 'surabaya', 'districtSlug' => 'coblong']));
         $response2->assertStatus(404);
+    }
+
+    public function test_city_and_district_training_details_show_context_content_related_links_and_consultation(): void
+    {
+        config(['services.whatsapp.phone' => '081299887766']);
+        $slug = 'pelatihan-pengolahan-dan-pemurnian-processing-tambang';
+        $title = 'Pelatihan Pengolahan dan Pemurnian (Processing) Tambang';
+        $catalog = app(\App\Services\SchemeService::class);
+        $related = $catalog->relatedTrainings($catalog->findTraining($slug));
+
+        $cityUrl = route('regional.city.program', ['city' => 'bandung', 'program' => $slug]);
+        $city = $this->get($cityUrl)->assertOk();
+        $city->assertSee($title)->assertSee('Kota Bandung')->assertSee('Tujuan &amp; Ruang Lingkup', false);
+        $city->assertSee('Siapa yang mungkin memerlukan topik ini?')->assertSee('Konteks wilayah');
+        $city->assertSee('Kompetensi &amp; Output Kerja', false)->assertSee('Pokok Materi &amp; Tahapan Kerja', false);
+        $city->assertSee('Jadwal Pelatihan')->assertSee('Belum dicantumkan');
+        $city->assertSee('Canonical URL')->assertSee('<link rel="canonical" href="' . $cityUrl . '">', false);
+        $city->assertSee(route('regional.province', 'jawa-barat'), false);
+        $city->assertSee('https://wa.me/6281299887766?text=' . rawurlencode("Halo, saya dari Kota Bandung dan ingin konsultasi mengenai {$title}."), false);
+        $this->assertNotEmpty($related);
+        foreach ($related as $item) {
+            $this->assertSame('ayana', $item['source']);
+            $city->assertSee(route('regional.city.program', ['city' => 'bandung', 'program' => $item['slug']]), false);
+        }
+
+        $districtUrl = route('regional.district.program', ['citySlug' => 'bandung', 'districtSlug' => 'coblong', 'program' => $slug]);
+        $district = $this->get($districtUrl)->assertOk();
+        $district->assertSee('Kecamatan Coblong')->assertSee('Kota Bandung')->assertSee($title);
+        $district->assertSee(route('regional.city', 'bandung'), false)->assertSee('FAQPage');
+        preg_match('~<script type="application/ld\+json">(.*?)</script>~s', $district->getContent(), $schemaMatch);
+        $faqSchema = json_decode($schemaMatch[1] ?? '', true);
+        $this->assertSame('FAQPage', $faqSchema['@type'] ?? null);
+        $district->assertSee('https://wa.me/6281299887766?text=' . rawurlencode("Halo, saya dari Kecamatan Coblong, Kota Bandung dan ingin konsultasi mengenai {$title}."), false);
+        foreach ($related as $item) {
+            $district->assertSee(route('regional.district.program', ['citySlug' => 'bandung', 'districtSlug' => 'coblong', 'program' => $item['slug']]), false);
+        }
+    }
+
+    public function test_province_training_detail_links_back_into_the_regional_hierarchy(): void
+    {
+        $slug = 'pelatihan-pengolahan-dan-pemurnian-processing-tambang';
+        $url = route('regional.province.program', ['province' => 'jawa-barat', 'program' => $slug]);
+        $response = $this->get($url)->assertOk();
+        $response->assertSee('Provinsi Jawa Barat')->assertSee('Pelatihan Pengolahan dan Pemurnian (Processing) Tambang');
+        $response->assertSee(route('regional.city', 'kab-bogor'), false);
+        $response->assertSee('<link rel="canonical" href="' . $url . '">', false);
     }
 
     /**

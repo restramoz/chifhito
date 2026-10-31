@@ -3,8 +3,8 @@
 {{-- District pages are intentionally noindex: content is thin until meaningful local detail is available --}}
 @section('robots', 'noindex, follow')
 
-@section('title', 'Skema Kompetensi ' . config('app.name', 'Najkaltare') . ' — Kecamatan ' . $district['name'] . ', ' . $district['city_name'])
-@section('meta_description', 'Halaman referensi wilayah administratif Kecamatan ' . $district['name'] . ' di ' . $district['city_name'] . '. Konsultasi skema kompetensi ' . config('app.name', 'Najkaltare') . ' tersedia melalui WhatsApp.')
+@section('title', 'Skema Kompetensi ' . config('app.name', 'Chifheto') . ' — Kecamatan ' . $district['name'] . ', ' . $district['city_name'])
+@section('meta_description', 'Halaman referensi wilayah administratif Kecamatan ' . $district['name'] . ' di ' . $district['city_name'] . '. Konsultasi skema kompetensi ' . config('app.name', 'Chifheto') . ' tersedia melalui WhatsApp.')
 @section('wa_message', $waMessage)
 
 @section('content')
@@ -33,18 +33,18 @@
             <div class="max-w-3xl">
                 <!-- Mobile hero image - Responsive with aspect-ratio -->
                 <div class="lg:hidden mb-4 -mx-4 sm:-mx-6 lg:-mx-8">
-                    <img src="/images/home/feature-lineworker-ppe.jpg" alt="Aktivitas {{ config('app.name', 'Najkaltare') }} di Kecamatan {{ $district['name'] }}" width="1600" height="900" loading="eager" fetchpriority="high" decoding="async" class="hero-image-mobile w-full object-cover object-center rounded-xl" />
+                    <img src="/images/home/hero-industrial.jpg" alt="Aktivitas {{ config('app.name', 'Chifheto') }} di Kecamatan {{ $district['name'] }}" width="1600" height="900" loading="eager" fetchpriority="high" decoding="async" class="hero-image-mobile w-full object-cover object-center rounded-xl" />
                 </div>
                 <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-burnt-brick border border-burnt-brick/80 text-white text-xs sm:text-sm font-semibold mb-5 shadow-sm">
                     <span class="w-2 h-2 rounded-full bg-safety-orange animate-pulse"></span>
                     Halaman Referensi Wilayah
                 </div>
                 <h1 id="dist-hero-heading" class="text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight text-white leading-tight uppercase">
-                    Skema Kompetensi {{ config('app.name', 'Najkaltare') }} – <span class="text-safety-orange">Kec. {{ $district['name'] }}</span>
+                    Skema Kompetensi {{ config('app.name', 'Chifheto') }} – <span class="text-safety-orange">Kec. {{ $district['name'] }}</span>
                 </h1>
                 <p class="mt-4 text-base text-neutral-200 leading-relaxed">
                     Halaman ini adalah halaman referensi wilayah untuk <strong class="text-white">Kecamatan {{ $district['name'] }}</strong>, <a href="{{ route('regional.city', $district['city_slug']) }}" class="text-safety-orange hover:underline font-semibold">{{ $district['city_name'] }}</a>, Provinsi {{ $district['province'] }}.
-                    Untuk konsultasi skema kompetensi {{ config('app.name', 'Najkaltare') }}, hubungi kami melalui WhatsApp.
+                    Untuk konsultasi skema kompetensi {{ config('app.name', 'Chifheto') }}, hubungi kami melalui WhatsApp.
                 </p>
                 <div class="mt-5 w-full sm:w-auto">
                     <x-wa-cta variant="primary" size="md" :message="$waMessage" label="Konsultasi via WhatsApp" class="w-full bg-safety-orange hover:bg-burnt-brick text-industry-black hover:text-white font-bold" />
@@ -70,11 +70,11 @@
     {{-- Program Links --}}
     <section class="py-14 sm:py-20 bg-white border-b border-neutral-200" aria-labelledby="dist-program-heading">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <h2 id="dist-program-heading" class="font-extrabold text-industry-black mb-6 text-[clamp(1.25rem,4vw,1.5rem)] sm:text-[clamp(1.5rem,4.5vw,1.75rem)]">Skema Kompetensi {{ config('app.name', 'Najkaltare') }}</h2>
+            <h2 id="dist-program-heading" class="font-extrabold text-industry-black mb-6 text-[clamp(1.25rem,4vw,1.5rem)] sm:text-[clamp(1.5rem,4.5vw,1.75rem)]">Skema Kompetensi {{ config('app.name', 'Chifheto') }}</h2>
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 @foreach ($programs as $prog)
                 @php $extra = $loop->iteration > 6; @endphp
-                <a href="{{ route('city.program.detail', ['city' => $district['city_slug'], 'program' => $prog['slug']]) }}" class="group flex flex-col bg-white rounded-xl border border-neutral-200 hover:border-burnt-brick hover:shadow-md transition-all overflow-hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-burnt-brick {{ $extra ? 'scheme-extra' : '' }}" @if($extra) hidden @endif>
+                <a href="{{ route('regional.district.program', ['citySlug' => $district['city_slug'], 'districtSlug' => $district['slug'], 'program' => $prog['slug']]) }}" class="group flex flex-col bg-white rounded-xl border border-neutral-200 hover:border-burnt-brick hover:shadow-md transition-all overflow-hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-burnt-brick {{ $extra ? 'scheme-extra' : '' }}" @if($extra) hidden @endif>
                     <div class="h-1.5 bg-safety-orange"></div>
                     <div class="p-6 flex-1 flex flex-col">
                         <div class="text-xs font-bold uppercase tracking-wider text-burnt-brick mb-1">{{ $prog['category_label'] ?? 'Layanan' }}</div>
@@ -130,7 +130,7 @@
             <h2 id="dist-article-heading" class="text-xl font-extrabold text-industry-black mb-2">
                 Artikel &amp; Panduan di Kecamatan {{ $district['name'] }}
             </h2>
-            <p class="text-sm text-dark-mahogany mb-8">Kumpulan artikel edukatif terkait skema kompetensi dan layanan {{ config('app.name', 'Najkaltare') }} untuk wilayah {{ $district['city_name'] }}.</p>
+            <p class="text-sm text-dark-mahogany mb-8">Kumpulan artikel edukatif terkait skema kompetensi dan layanan {{ config('app.name', 'Chifheto') }} untuk wilayah {{ $district['city_name'] }}.</p>
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 @foreach($articles as $art)
                 <a href="{{ route('articles.show', $art->slug) }}" class="group flex flex-col bg-white rounded-xl border border-neutral-200 hover:border-burnt-brick hover:shadow-md transition-all overflow-hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-burnt-brick">
@@ -172,7 +172,7 @@
                     Konsultasi via WhatsApp<br><span class="text-safety-orange">Kecamatan {{ $district['name'] }}</span>
                 </h2>
                 <p class="mt-4 text-sm text-neutral-200 leading-relaxed">
-                    Hubungi kami untuk informasi skema kompetensi, halaman program, atau kebutuhan konsultasi {{ config('app.name', 'Najkaltare') }}.
+                    Hubungi kami untuk informasi skema kompetensi, halaman program, atau kebutuhan konsultasi {{ config('app.name', 'Chifheto') }}.
                 </p>
                 <div class="mt-5 flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 w-full">
                     <x-wa-cta variant="primary" size="lg" :message="$waMessage" label="Konsultasi Sekarang" class="w-full sm:w-auto bg-safety-orange hover:bg-burnt-brick text-industry-black hover:text-white font-bold shadow-lg" />

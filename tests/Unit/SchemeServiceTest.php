@@ -45,7 +45,70 @@ class SchemeServiceTest extends TestCase
             }
         }
 
-        $this->assertCount($expected, $this->service->all());
+        $this->assertCount($expected + 318, $this->service->all());
+        $training = array_filter($this->service->all(), static fn (array $item) => $item['source'] === 'ayana');
+        $this->assertCount(318, $training);
+        $this->assertCount(318, array_unique(array_column($training, 'title')));
+    }
+
+    public function test_ayana_training_keeps_source_title_and_has_distinct_type_and_categories(): void
+    {
+        $training = $this->service->find('pelatihan-pengolahan-dan-pemurnian-processing-tambang');
+        $this->assertNotNull($training);
+        $this->assertSame('Pelatihan Pengolahan dan Pemurnian (Processing) Tambang', $training['title']);
+        $this->assertSame('training', $training['category']);
+        $this->assertSame('ayana', $training['source']);
+        $this->assertNotSame('', $training['category_label']);
+        $this->assertSame([], $training['faqs']);
+        $this->assertSame([], $training['target_audience']);
+        $this->assertStringContainsString('list_pelatihan_ayana.json', $training['source_file']);
+    }
+
+    public function test_exact_ayana_duplicates_are_known_and_only_listed_once(): void
+    {
+        $source = json_decode(file_get_contents(base_path('list_pelatihan_ayana.json')), true);
+        $counts = array_count_values($source);
+        $duplicates = array_filter($counts, static fn (int $count) => $count > 1);
+
+        $this->assertSame([
+            'Teknik Benefisiasi Tambang' => 2,
+            'Teknologi Smelter dan Hidrometalurgi' => 2,
+            'Storage Tank Oil & Gas' => 2,
+        ], $duplicates);
+        $this->assertCount(318, $this->service->bySource('ayana'));
+    }
+
+    public function test_training_loader_isolated_from_legacy_catalog_loader(): void
+    {
+        $isolated = new class extends SchemeService {
+            public function all(?string $source = null, array $filters = []): array
+            {
+                throw new \LogicException('Training catalog must not invoke the legacy combined loader.');
+            }
+        };
+
+        $trainings = $isolated->trainings();
+        $this->assertCount(318, $trainings);
+        $this->assertSame(['ayana'], array_values(array_unique(array_column($trainings, 'source'))));
+        $this->assertSame(['list_pelatihan_ayana.json'], array_values(array_unique(array_column($trainings, 'source_file'))));
+    }
+
+    public function test_training_categories_are_derived_from_ayana_titles(): void
+    {
+        $trainings = $this->service->trainings();
+        $categories = $this->service->trainingCategories();
+        $flattened = [];
+
+        foreach ($categories as $label => $items) {
+            foreach ($items as $item) {
+                $this->assertSame($label, $item['category_label']);
+                $flattened[] = $item['title'];
+            }
+        }
+
+        $this->assertCount(318, $flattened);
+        $this->assertEqualsCanonicalizing(array_column($trainings, 'title'), $flattened);
+        $this->assertContains('Pertambangan dan Geologi', array_keys($categories));
     }
 
     public function test_catalog_has_no_competency_units_from_layanan_json(): void
@@ -67,6 +130,8 @@ class SchemeServiceTest extends TestCase
         $this->assertSame('Layanan', $sources['layanan']['title']);
         $this->assertSame('layanan.json', $sources['layanan']['file']);
         $this->assertGreaterThan(0, $sources['layanan']['count']);
+        $this->assertSame('list_pelatihan_ayana.json', $sources['ayana']['file']);
+        $this->assertSame(318, $sources['ayana']['count']);
     }
 
     public function test_find_returns_scheme_by_derived_slug(): void

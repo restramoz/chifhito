@@ -39,7 +39,7 @@ return [
         // Official number intentionally blank until the owner supplies it.
         // When blank/invalid, CTAs render non-link contact text (no wa.me URL).
         'phone' => env('WHATSAPP_PHONE', ''),
-        'default_message' => env('WHATSAPP_DEFAULT_MESSAGE', 'Halo, saya ingin konsultasi mengenai pelatihan dan skema kompetensi pertambangan, mineral, batubara, dan energi.'),
+        'default_message' => env('WHATSAPP_DEFAULT_MESSAGE', 'Halo, saya ingin konsultasi mengenai program pelatihan profesional Chifheto.'),
         // Neutral fallback shown in place of a broken/non-working WhatsApp link.
         'fallback_text' => env('WHATSAPP_FALLBACK_TEXT', 'Hubungi admin untuk informasi konsultasi.'),
         // Public business numbers for article callouts (deterministic).

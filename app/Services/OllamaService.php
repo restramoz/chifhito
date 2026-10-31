@@ -7,6 +7,7 @@ use App\Support\WhatsApp;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
 
 class OllamaService
@@ -50,14 +51,15 @@ class OllamaService
     public function pickTopicForRegion(string $cityName, ?string $citySlug = null): array
     {
         $existingTitles = [];
-        if ($citySlug) {
+        if ($citySlug && Schema::hasTable('articles')) {
             $existingTitles = Article::where('target_city_slug', $citySlug)
                 ->pluck('title')
                 ->toArray();
         }
 
-        // Pick an unused real scheme from the authoritative catalog.
-        foreach ($this->schemes->all() as $scheme) {
+        // Choose exclusively from the Ayana training source, preserving titles.
+        $catalog = array_values($this->schemes->trainings());
+        foreach ($catalog as $scheme) {
             $name = (string) ($scheme['title'] ?? '');
             if ($name === '') {
                 continue;
@@ -72,25 +74,26 @@ class OllamaService
             }
 
             if (! $isUsed) {
-                $units = array_values($scheme['units'] ?? []);
-                $unitLabels = array_slice(array_map(
-                    static fn (array $u): string => trim((string) ($u['code'] ?? '')).' — '.trim((string) ($u['name'] ?? '')),
-                    $units
-                ), 0, 5);
-
                 return [
-                    'topic' => "Panduan {$name} untuk Proyek di {$cityName}",
-                    'focus' => 'Unit kompetensi terkait: '.implode(', ', $unitLabels),
+                    'topic' => $name,
+                    'focus' => "Gunakan judul katalog sebagai konteks: {$name}. Bahas prinsip teknis umum yang relevan dan tandai hal yang perlu diverifikasi di lokasi kerja.",
                 ];
             }
         }
 
-        $count = count($existingTitles) + 1;
+        // If every title has been used in this city, cycle through source titles
+        // instead of making up a training topic outside the catalog.
+        if ($catalog !== []) {
+            $selected = $catalog[count($existingTitles) % count($catalog)];
+            $name = (string) $selected['title'];
 
-        return [
-            'topic' => "Strategi Pengembangan Kompetensi di {$cityName} (Bagian {$count})",
-            'focus' => 'Pengembangan kompetensi layanan berbasis skema dari berbagai industri',
-        ];
+            return [
+                'topic' => $name,
+                'focus' => "Gunakan judul katalog sebagai konteks: {$name}. Bahas prinsip teknis umum yang relevan dan tandai hal yang perlu diverifikasi di lokasi kerja.",
+            ];
+        }
+
+        throw new \RuntimeException('Katalog pelatihan Ayana tidak memuat judul yang dapat digunakan.');
     }
 
     /**
@@ -101,10 +104,10 @@ class OllamaService
         $brandName = $this->brandName();
 
         if ($serviceName === null || $serviceName === '') {
-            return "{$brandName} adalah perusahaan layanan industri lintas sektor. Cerminkan cakupan katalog yang meliputi SIA, SLO, SLF, Riksa Uji, pelatihan, sertifikasi, inspeksi, dan layanan industri lainnya; jangan membatasi perusahaan pada satu industri.";
+            return "{$brandName} menyajikan informasi pelatihan profesional lintas bidang. Gunakan katalog pelatihan sebagai sumber topik dan jangan mengklaim program, sertifikasi, atau afiliasi yang tidak tercantum.";
         }
 
-        return "Program spesifik: {$serviceName}. Sebutkan {$serviceName} secara alami sebagai salah satu layanan {$brandName}, lalu konsentrasikan isi artikel pada lingkup layanan tersebut.";
+            return "Topik katalog: {$serviceName}. Pertahankan ejaan judul sumber dan bahas hanya konteks teknis yang dapat dijelaskan secara umum; jangan menganggap judul sebagai bukti sertifikasi atau hasil tertentu.";
     }
 
     /**
@@ -148,36 +151,45 @@ class OllamaService
         $serviceSlug = isset($params['service_slug']) ? (string) $params['service_slug'] : null;
         $serviceName = null;
         if ($serviceSlug !== null && $serviceSlug !== '') {
-            $scheme = $this->schemes->find($serviceSlug);
+            $scheme = $this->schemes->findTraining($serviceSlug);
             $serviceName = is_array($scheme) && ! empty($scheme['title']) ? (string) $scheme['title'] : null;
         }
 
         // Auto topic selection if not manually provided
         if (empty($params['topic'])) {
-            $selected = $this->pickTopicForRegion($cityName, $citySlug);
-            $topic = $selected['topic'];
-            $focus = $selected['focus'];
+            if ($serviceName === null) {
+                $selected = $this->pickTopicForRegion($cityName, $citySlug);
+                $serviceName = $selected['topic'];
+                $focus = $selected['focus'];
+            } else {
+                $focus = "Gunakan judul pelatihan Ayana sebagai fokus artikel: {$serviceName}. Bahas prinsip teknis umum yang relevan dan tandai hal yang perlu diverifikasi di lokasi kerja.";
+            }
+            $topic = 'Panduan pengembangan kompetensi: ' . $serviceName;
         } else {
             $topic = trim((string) $params['topic']);
-            $focus = $params['focus'] ?? ('Kompetensi ' . ($serviceName ?: 'layanan industri lintas sektor') . ' serta layanan terkait ' . ($serviceName ?: $brandName));
+            if ($serviceName === null) {
+                $selected = $this->pickTopicForRegion($cityName, $citySlug);
+                $serviceName = $selected['topic'];
+            }
+            $focus = ($params['focus'] ?? 'Kembangkan sudut bahasan yang diminta') . '; judul pelatihan sumber Ayana sebagai konteks: ' . $serviceName;
         }
 
         $locationContext = $districtName ? "Kecamatan {$districtName}, {$cityName}" : $cityName;
 
         $systemPrompt = <<<PROMPT
-Anda adalah konsultan dan instruktur kompetensi profesional Indonesia yang menulis untuk {$brandName}, perusahaan layanan industri lintas sektor.
-Tugas Anda adalah menulis artikel edukatif dan otoritatif dalam Bahasa Indonesia formal mengenai layanan {$brandName} sesuai topik yang dipilih. Cakupan perusahaan meliputi layanan SIA, SLO, SLF, Riksa Uji, pelatihan, sertifikasi, inspeksi, dan jasa industri lintas sektor; jangan menggambarkan perusahaan seolah hanya bergerak di satu industri. Struktur artikel harus mencakup: Pembuka (intro), Silabus, Materi, Isi Konten, dan Penutup (conclusion).
+Anda adalah penulis teknis berbahasa Indonesia untuk {$brandName}, platform informasi dan konsultasi pelatihan profesional.
+Tulis artikel edukatif yang relevan dengan judul pelatihan dalam katalog Chifheto dan konteks industri Indonesia. Katalog mencakup pertambangan dan geologi, minyak dan gas, pemboran, engineering, keselamatan, lingkungan, energi, konstruksi, bisnis dan operasi teknis. Struktur artikel: pembuka, ruang lingkup yang dibahas, penjelasan teknis, pertimbangan penerapan, dan penutup.
 Nama organisasi yang digunakan: {$brandName}. Gunakan nama ini secara konsisten bila nama organisasi diperlukan dan jangan menggantinya dengan nama organisasi lain.
 PERTIMBANGAN PROGRAM: {$this->serviceContextLine($serviceName)}
 
 ATURAN KUALITATAS & GAYA PENULISAN:
 1. Nada bahasa: Profesional, lugas, mengalir alami, berbobot untuk pengambil keputusan dan praktisi dari layanan yang dibahas.
 2. Dilarang menggunakan filler AI klise seperti "Di era modern saat ini", "Tak dapat dipungkiri", atau kalimat berulang.
-3. Rujuk regulasi atau standar hanya jika Anda yakin terhadap sumber resminya. Jangan mengarang nomor regulasi, pasal, jadwal tetap, biaya fiktif, alamat kantor palsu, atau klaim akreditasi/otorisasi.
-4. Jangan mengarang jadwal tetap, biaya fiktif, alamat kantor palsu, atau klaim akreditasi sepihak. Arahkan konsultasi resmi melalui WhatsApp.
+3. Rujuk regulasi atau standar hanya jika Anda yakin terhadap sumber resmi dan dapat menyebutkannya dengan tepat. Jika ragu, jangan menyebut nomor atau ketentuan.
+4. Jangan mengarang tanggal, jadwal, harga, sertifikasi, hasil belajar, kelayakan, afiliasi institusi, atau alamat. Sampaikan bahwa rincian perlu dikonfirmasi.
 5. Gunakan tag HTML semantik: <h2>, <h3>, <p>, <ul>, <ol>, <li>, <strong>, <blockquote>, <table><thead><tr><th>...</th></tr></thead><tbody><tr><td>...</td></tr></tbody></table>.
 6. Panjang target: Sekitar {$wordCount} kata (antara 6.000 hingga 9.000 kata).
-7. Buat image_brief terpisah yang siap digunakan oleh desainer di Google Flow untuk menghasilkan gambar fotografi realistis beresolusi tinggi TANPA teks di gambar.
+7. Buat image_brief untuk foto dokumenter realistis yang sesuai topik, tanpa tulisan dan tanpa visual klise.
 8. Bila program pelatihan spesifik disebutkan, konsentrasikan materi pada lingkup program tersebut dan hindari menyerempet program pelatihan lain.
 
 OUTPUT WAJIB:
@@ -206,9 +218,9 @@ PROMPT;
         $serviceLine = $serviceName !== null ? "- Program Spesifik: {$serviceName}\n" : '';
 
         $userPrompt = <<<PROMPT
-Silakan buat artikel layanan dan skema kompetensi {$brandName} dengan rincian berikut:
+Silakan buat artikel teknis {$brandName} dengan rincian berikut:
 - Organisasi: {$brandName}
-- Cakupan layanan: SIA, SLO, SLF, Riksa Uji, pelatihan, sertifikasi, inspeksi, serta layanan industri lintas sektor.
+- Gunakan konteks pelatihan dan industri yang relevan; jangan menyatakan sertifikasi atau hasil program sebagai fakta tanpa sumber.
 - Topik Artikel: {$topic}
 - Fokus Materi: {$focus}
 - Lokasi Target: {$locationContext}
@@ -437,7 +449,7 @@ PROMPT;
             'suggested_faqs' => [],
             'image_brief' => [
                 'concept' => "Layanan di {$cityName}",
-                'english_prompt' => 'Professional photograph of a electrical safety facility inspection or briefing inside a modern industrial facility in Indonesia, realistic lighting, no text',
+            'english_prompt' => 'Documentary style photograph of Indonesian technical professionals discussing a relevant industrial training topic at a real worksite, natural light, authentic equipment, no text or logos',
                 'aspect_ratio' => '16:9',
                 'recommended_alt' => "{$brandLine} - {$fallbackTopic}",
             ],
@@ -647,7 +659,7 @@ protected function addArticleConsultationBlock(array $result): array
 
     protected function brandName(): string
     {
-        return trim((string) config('app.name')) ?: 'Najkaltare';
+        return trim((string) config('app.name')) ?: 'Chifheto';
     }
 
     /**

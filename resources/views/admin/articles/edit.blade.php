@@ -340,7 +340,7 @@
 document.addEventListener('DOMContentLoaded', function () {
     // 1. Inisialisasi Jodit Editor
     const editor = Jodit.make('#content_editor', {
-        placeholder: 'Tulis konten artikel edukasi pertambangan dan energi di sini...',
+        placeholder: 'Tulis konten artikel artikel teknis di sini...',
         height: 480,
         toolbarAdaptive: false,
         uploader: {

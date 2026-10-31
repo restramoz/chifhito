@@ -5,7 +5,7 @@ namespace App\Services;
 use Illuminate\Support\Str;
 
 /**
- * Loads the five authoritative mining/energy scheme catalogs and exposes them
+ * Loads the authoritative service and training sources and exposes them
  * as one unified program catalog with source attribution.
  *
  * Source files are read-only: records are adapted, not rewritten. Names,
@@ -18,41 +18,21 @@ class SchemeService
      */
     protected const SOURCE_FILES = [
         'layanan' => 'layanan.json',
+        'ayana' => 'list_pelatihan_ayana.json',
     ];
 
     protected const SOURCE_IMAGES = [
-        'k3listrik' => '/images/home/sumber-teknisi.jpg',
+        'ayana' => '/images/categories/pertambangan-migas-geologi.jpg',
     ];
-
-    /**
-     * Descriptive Indonesian alt text specific to each category image.
-     */
-    protected const SOURCE_IMAGE_ALTS = [
-        'k3listrik' => 'Teknisi K3 Listrik dengan helm keselamatan di dekat panel listrik dan instalasi kelistrikan industri',
-    ];
-
-    /**
-     * Homepage presentation groupings for the unified catalog. Display-only
-     * buckets matched against service names; names, slugs and records stay
-     * untouched. Evaluation order matters: verbs-and-tools, then installation,
-     * then automation, then safety/roles, anything unmatched falls to
-     * Maintenance & Pengukuran.
-     */
-    protected const PRESENTATION_GROUPS = [
-        'maintenance-pengukuran' => ['maintenance', 'pemeliharaan', 'pengoperasian', 'testing', 'commissioning', 'troubleshooting', 'multimeter', 'alat ukur'],
-        'instalasi-proteksi' => ['instalasi', 'inslatasi', 'proteksi', 'grounding', 'wiring', 'distribution', 'panel', 'switchgear', 'switchboard', 'circuit breaker', 'short circuit', 'overcurrent', 'transformator', 'penerangan', 'pju', 'sel surya', 'air conditioning', 'gedung', 'arus kuat', 'komponen listrik'],
-        'otomasi-industri' => ['plc', 'scada', 'otomasi', 'elektronika', 'elektro', 'arus lemah'],
-        'k3-listrik' => ['k3', 'osha', 'arc flash', 'arc blast', 'shock', 'kebakaran', 'bahaya', 'alat pelindung', 'helm', 'sarung tangan', 'gfci', 'inspektur'],
-    ];
-
-    /**
-     * Role keywords for the group fallback (Maintenance & Pengukuran).
-     */
-    protected const PRESENTATION_ROLES = ['engineer', 'technician', 'teknisi', 'operator', 'supervisor', 'manager', 'praktisi', 'pemula'];
 
     protected ?array $programs = null;
 
     protected ?array $sources = null;
+
+    /** Ayana-only cache for every public training feature. */
+    protected ?array $trainingPrograms = null;
+
+    protected ?array $trainingSource = null;
 
     /**
      * Cached adapters for single files loaded ad-hoc.
@@ -84,57 +64,138 @@ class SchemeService
     }
 
     /**
-     * Group the unified catalog into the four homepage presentation buckets.
-     * Purely presentational: keyed by each program's slug, order preserved.
+     * Return training records loaded directly from the Ayana source file.
+     * This path never reads layanan.json.
      *
-     * @return array<string, array<string, array>> bucket => slug => program
+     * @return array<string, array>
      */
-    public function groupedForPresentation(): array
+    public function trainings(array $filters = []): array
     {
-        $groups = [
-            'maintenance-pengukuran' => [],
-            'instalasi-proteksi' => [],
-            'otomasi-industri' => [],
-            'k3-listrik' => [],
-        ];
-
-        foreach ($this->load() as $slug => $program) {
-            $t = ' ' . mb_strtolower((string) $program['title']) . ' ';
-
-            if (self::matchesAny(self::PRESENTATION_GROUPS['maintenance-pengukuran'], $t)) {
-                $bucket = 'maintenance-pengukuran';
-            } elseif (self::matchesAny(self::PRESENTATION_GROUPS['instalasi-proteksi'], $t)) {
-                $bucket = 'instalasi-proteksi';
-            } elseif (self::matchesAny(self::PRESENTATION_GROUPS['otomasi-industri'], $t)) {
-                $bucket = 'otomasi-industri';
-            } elseif (self::matchesAny(self::PRESENTATION_GROUPS['k3-listrik'], $t)) {
-                $bucket = 'k3-listrik';
-            } elseif (self::matchesAny(self::PRESENTATION_ROLES, $t)) {
-                $bucket = 'maintenance-pengukuran';
-            } else {
-                $bucket = 'maintenance-pengukuran';
+        if ($this->trainingPrograms === null) {
+            $file = 'list_pelatihan_ayana.json';
+            $path = base_path($file);
+            $raw = is_file($path) ? file_get_contents($path) : false;
+            if ($raw === false) {
+                throw new \RuntimeException('Unable to read training source file: ' . $file);
             }
 
-            $groups[$bucket][$slug] = $program;
+            $titles = json_decode($raw, true);
+            if (!is_array($titles) || !array_is_list($titles)) {
+                throw new \RuntimeException('Invalid training list in source file: ' . $file);
+            }
+
+            $seen = [];
+            $schemes = [];
+            foreach ($titles as $index => $title) {
+                if (!is_string($title) || trim($title) === '') {
+                    throw new \RuntimeException('Training source ' . $file . ' contains an invalid title at index ' . $index . '.');
+                }
+                if (isset($seen[$title])) {
+                    continue;
+                }
+                $seen[$title] = true;
+                $schemes[] = [
+                    'name' => $title,
+                    'category' => $this->trainingCategory($title),
+                    'lsp' => null,
+                    'units' => [],
+                ];
+            }
+
+            [$sourceMeta, $adapted] = $this->adaptSource('ayana', $file, [
+                'title' => 'Pelatihan Ayana',
+                'schemes' => $schemes,
+            ]);
+
+            $programs = [];
+            foreach ($adapted as $scheme) {
+                $name = (string) $scheme['name'];
+                $base = Str::slug($name);
+                $slug = $base;
+                $suffix = 2;
+                while (isset($programs[$slug])) {
+                    $slug = $base . '-' . $suffix++;
+                }
+                $programs[$slug] = $this->program($slug, $name, $scheme, $sourceMeta);
+            }
+
+            $this->trainingPrograms = $programs;
+            $this->trainingSource = $sourceMeta;
         }
 
-        return $groups;
+        return $filters === [] ? $this->trainingPrograms : $this->filterLoaded($this->trainingPrograms, $filters);
+    }
+
+    /** @return array{ayana: array} */
+    public function trainingSources(): array
+    {
+        $this->trainings();
+
+        return ['ayana' => $this->trainingSource];
+    }
+
+    public function findTraining(string $identifier): ?array
+    {
+        $trainings = $this->trainings();
+        if (str_contains($identifier, ':')) {
+            [$source, $slug] = explode(':', $identifier, 2);
+            if ($source !== 'ayana') {
+                return null;
+            }
+            $identifier = $slug;
+        }
+
+        return $trainings[Str::slug($identifier)] ?? null;
+    }
+
+    public function searchTrainings(string $query): array
+    {
+        return $this->trainings(['q' => $query]);
+    }
+
+    /** Return related training records ranked by category and shared topic words. */
+    public function relatedTrainings(array $training, int $limit = 4): array
+    {
+        $stopWords = ['dan', 'atau', 'untuk', 'dengan', 'dalam', 'pada', 'yang', 'di', 'ke', 'the', 'and', 'of', 'for', 'to', 'pelatihan', 'training', 'sertifikasi'];
+        $tokens = static function (string $title) use ($stopWords): array {
+            $words = preg_split('/[^\pL\pN]+/u', mb_strtolower($title), -1, PREG_SPLIT_NO_EMPTY) ?: [];
+
+            return array_values(array_diff(array_filter($words, static fn (string $word): bool => mb_strlen($word) > 2), $stopWords));
+        };
+
+        $sourceTokens = $tokens((string) ($training['title'] ?? ''));
+        $ranked = [];
+        foreach ($this->trainings() as $slug => $candidate) {
+            if ($slug === ($training['slug'] ?? null)) {
+                continue;
+            }
+
+            $shared = count(array_intersect($sourceTokens, $tokens((string) $candidate['title'])));
+            $sameCategory = ($candidate['category_label'] ?? null) === ($training['category_label'] ?? null);
+            $score = ($sameCategory ? 10 : 0) + ($shared * 3);
+            if ($score > 0) {
+                $ranked[] = ['score' => $score, 'program' => $candidate];
+            }
+        }
+
+        usort($ranked, static fn (array $a, array $b): int => $b['score'] <=> $a['score']);
+
+        return array_slice(array_column($ranked, 'program'), 0, max(0, $limit));
+    }
+
+    public function trainingCategories(): array
+    {
+        return collect($this->trainings())->groupBy('category_label')->map(fn ($items) => $items->all())->all();
     }
 
     /**
-     * Substring match on the padded lowercase title.
+     * Group the complete catalog by its source category, preserving item order.
      *
-     * @param array<int, string> $keywords
+     * @return array<string, array<string, array>> category => slug => program
      */
-    protected static function matchesAny(array $keywords, string $lowercasedTitle): bool
+    public function groupedForPresentation(): array
     {
-        foreach ($keywords as $keyword) {
-            if (str_contains($lowercasedTitle, ' ' . $keyword)) {
-                return true;
-            }
-        }
-
-        return false;
+        return $this->trainingCategories();
     }
 
     public function getSource(string $key): ?array
@@ -167,6 +228,10 @@ class SchemeService
 
     public function bySource(string $source): array
     {
+        if ($source === 'ayana') {
+            return $this->trainings();
+        }
+
         return $this->all($source);
     }
 
@@ -207,6 +272,14 @@ class SchemeService
         return $record['source'] ?? $record['source_key'] ?? null;
     }
 
+    /** Look up a legacy layanan.json record for backward-compatible detail URLs. */
+    public function findLegacyService(string $identifier): ?array
+    {
+        $key = Str::slug($identifier);
+
+        return $this->all('layanan')[$key] ?? null;
+    }
+
     protected function load(?string $path = null): array
     {
         // Ad-hoc single-file load, used by tests and validation tooling.
@@ -235,11 +308,22 @@ class SchemeService
                 throw new \RuntimeException('Invalid JSON in scheme source file: ' . $file);
             }
 
+            if ($key === 'ayana' && array_is_list($decoded) && ($decoded === [] || is_string($decoded[0] ?? null))) {
+                $seen = [];
+                $decoded = array_values(array_filter($decoded, function ($name) use (&$seen) {
+                    if (!is_string($name) || isset($seen[$name])) return false;
+                    $seen[$name] = true;
+                    return true;
+                }));
+                $decoded = ['title' => 'Pelatihan', 'schemes' => array_map(fn ($name) => [
+                    'name' => $name, 'category' => $this->trainingCategory($name), 'lsp' => null, 'units' => [],
+                ], $decoded)];
+            }
             [$sourceMeta, $adapted] = $this->adaptSource($key, $file, $decoded);
 
             $adapted = array_values(array_filter(
                 $adapted,
-                static fn (array $scheme): bool => !self::isExcludedService((string) ($scheme['name'] ?? ''))
+                static fn (array $scheme): bool => $key === 'ayana' || !self::isExcludedService((string) ($scheme['name'] ?? ''))
             ));
 
             // Merge adapted schemes, preserving deterministic slug collisions
@@ -366,8 +450,9 @@ class SchemeService
                         throw new \RuntimeException('Scheme source ' . $sourceFile . ' contains an empty service name in category ' . $categoryName . '.');
                     }
 
-                    // Excluded services are removed in the catalog loading path.
-                    if (self::isExcludedService($name)) {
+                    // Keep every source training title; legacy service exclusions
+                    // apply only to the original layanan catalog.
+                    if ($sourceKey !== 'ayana' && self::isExcludedService($name)) {
                         continue;
                     }
 
@@ -435,7 +520,7 @@ class SchemeService
         // Never expose excluded services through catalog metadata either.
         $adapted = array_values(array_filter(
             $adapted,
-            static fn (array $s): bool => !self::isExcludedService((string) ($s['name'] ?? ''))
+            static fn (array $s): bool => $sourceKey === 'ayana' || !self::isExcludedService((string) ($s['name'] ?? ''))
         ));
 
         $unitCount = array_sum(array_map(
@@ -454,8 +539,8 @@ class SchemeService
             'count' => count($adapted),
             'scheme_count' => count($adapted),
             'unit_count' => $unitCount,
-            'image_url' => self::SOURCE_IMAGES[$sourceKey] ?? '/images/home/sumber-teknisi.jpg',
-            'image_alt' => self::SOURCE_IMAGE_ALTS[$sourceKey] ?? ('Layanan ' . $categoryName),
+            'image_url' => self::SOURCE_IMAGES[$sourceKey] ?? '/images/categories/teknis-profesi-lainnya.jpg',
+            'image_alt' => 'Pelatihan profesional bidang ' . $categoryName,
         ];
 
         return [$meta, $adapted];
@@ -491,7 +576,7 @@ class SchemeService
             }
 
             if ($key === 'category' || $key === 'source_category') {
-                if ((string) ($program['source'] ?? '') !== (string) $value && (string) ($program['source_title'] ?? '') !== (string) $value) {
+                if ((string) ($program['category_label'] ?? '') !== (string) $value && (string) ($program['source_title'] ?? '') !== (string) $value && (string) ($program['source'] ?? '') !== (string) $value) {
                     return false;
                 }
                 continue;
@@ -500,6 +585,7 @@ class SchemeService
             if ($key === 'q' || $key === 'query' || $key === 'search') {
                 $haystack = implode(' ', [
                     (string) ($program['title'] ?? ''),
+                    (string) ($program['category_label'] ?? ''),
                     (string) ($program['source_title'] ?? ''),
                     (string) ($program['slug'] ?? ''),
                 ]);
@@ -550,7 +636,23 @@ class SchemeService
         $sourceTitle = (string) ($scheme['source_title'] ?? $sourceMeta['title'] ?? '');
         $sourceFile = (string) ($scheme['source_file'] ?? $sourceMeta['file'] ?? '');
         $categoryName = (string) ($scheme['category'] ?? ($sourceTitle !== '' ? $sourceTitle : 'Layanan'));
+        $typeLabel = $sourceKey === 'ayana' ? 'Pelatihan' : 'Layanan';
         $stableId = $sourceKey . ':' . $slug;
+        $trainingInfo = $sourceKey === 'ayana'
+            ? [
+                'jadwal' => ['label' => 'Jadwal Pelatihan', 'status' => 'Belum dicantumkan', 'detail' => 'Tanggal dan ketersediaan jadwal tidak tercantum dalam katalog Ayana. Konfirmasikan kepada penyelenggara.'],
+                'durasi' => ['label' => 'Durasi Program', 'status' => 'Belum dicantumkan', 'detail' => 'Durasi dan moda pelaksanaan tidak tercantum dalam katalog Ayana. Minta rincian resmi sebelum mendaftar.'],
+                'investasi' => ['label' => 'Investasi Biaya', 'status' => 'Belum dicantumkan', 'detail' => 'Harga tidak tercantum dalam katalog Ayana. Mintalah penawaran resmi kepada penyelenggara.'],
+                'persyaratan' => ['label' => 'Persyaratan Peserta', 'status' => 'Belum dicantumkan', 'detail' => 'Persyaratan dan ketentuan peserta tidak tercantum dalam katalog Ayana. Kesesuaian peserta perlu dikonfirmasi.'],
+                'otorisasi' => ['label' => 'Status Otorisasi / Sertifikasi', 'status' => 'Belum dicantumkan', 'detail' => 'Katalog Ayana tidak menyatakan status sertifikasi, lisensi, atau otorisasi untuk judul ini. Verifikasi kepada penyelenggara atau lembaga berwenang.'],
+            ]
+            : [
+                'jadwal' => ['label' => 'Jadwal Pelatihan', 'status' => 'Hubungi kami', 'detail' => 'Jadwal dikonfirmasi melalui konsultasi dengan penyelenggara.'],
+                'durasi' => ['label' => 'Durasi Program', 'status' => 'Perlu verifikasi', 'detail' => 'Durasi dan moda penyelenggaraan dikonfirmasi bersama penyelenggara.'],
+                'investasi' => ['label' => 'Investasi Biaya', 'status' => 'Hubungi kami', 'detail' => 'Biaya tidak dipublikasikan. Hubungi kami untuk penawaran resmi.'],
+                'persyaratan' => ['label' => 'Persyaratan Peserta', 'status' => 'Perlu verifikasi', 'detail' => 'Persyaratan peserta dikonfirmasi ke penyelenggara skema.'],
+                'otorisasi' => ['label' => 'Status Otorisasi', 'status' => 'Perlu verifikasi', 'detail' => 'Status skema kompetensi dikonfirmasi bersama LSP/penyelenggara terkait.'],
+            ];
 
         return [
             'id' => $stableId,
@@ -562,25 +664,25 @@ class SchemeService
             'source_file' => $sourceFile,
             'source_index' => $scheme['source_index'] ?? null,
             'slug' => $slug,
-            'image_url' => self::SOURCE_IMAGES[$sourceKey] ?? '/images/home/sumber-teknisi.jpg',
-            'image_alt' => self::SOURCE_IMAGE_ALTS[$sourceKey] ?? ('Layanan ' . $categoryName),
-            'category' => 'training-service',
+            'image_url' => self::SOURCE_IMAGES[$sourceKey] ?? '/images/categories/teknis-profesi-lainnya.jpg',
+            'image_alt' => 'Pelatihan profesional bidang ' . $categoryName,
+            'category' => $sourceKey === 'ayana' ? 'training' : 'training-service',
             'category_label' => $categoryName,
             'sector' => Str::slug($categoryName),
-            'level' => $lsp ?? ('Layanan ' . $categoryName),
+            'level' => $lsp ?? ($typeLabel . ' ' . $categoryName),
             'title' => $name,
-            'badge' => $lsp ?? ('Layanan ' . $categoryName),
-            'meta_title' => $name . ' | ' . config('app.name', 'Najkaltare'),
-            'meta_description' => 'Layanan ' . $categoryName . ' ' . $name . '. Rincian program dikonfirmasi melalui konsultasi.',
+            'badge' => $lsp ?? ($typeLabel . ' ' . $categoryName),
+            'meta_title' => $name . ' | ' . config('app.name', 'Chifheto'),
+            'meta_description' => $typeLabel . ' ' . $name . ' tercantum dalam katalog ' . $categoryName . '. Rincian dikonfirmasi melalui konsultasi.',
             'hero_heading' => $categoryName,
             'hero_highlight' => $name,
-            'hero_subheading' => 'Informasi layanan ' . $categoryName . ' ' . $name . '; rincian penyelenggaraan dikonfirmasi melalui konsultasi.',
+            'hero_subheading' => 'Informasi ' . mb_strtolower($typeLabel) . ' ' . $name . '; rincian penyelenggaraan dikonfirmasi melalui konsultasi.',
             'wa_message' => 'Halo, saya ingin konsultasi mengenai ' . $name . '.',
-            'introduction' => 'Layanan ' . $name . ' merupakan bagian dari ' . $categoryName . '. Rincian kurikulum dan persyaratan penyelenggaraan dikonfirmasi melalui konsultasi.',
-            'target_audience' => [
+            'introduction' => $typeLabel . ' ' . $name . ' tercantum dalam katalog bidang ' . $categoryName . '. Rincian materi dan penyelenggaraan perlu dikonfirmasi.',
+            'target_audience' => $sourceKey === 'ayana' ? [] : [
                 'Pihak yang membutuhkan layanan ' . $categoryName . '; kecocokan latar belakang dikonfirmasi melalui konsultasi.',
             ],
-            'roles_and_responsibilities' => [
+            'roles_and_responsibilities' => $sourceKey === 'ayana' ? [] : [
                 [
                     'title' => 'Kompetensi Skema',
                     'description' => 'Rincian lingkup materi layanan ini dikonfirmasi melalui konsultasi.',
@@ -590,14 +692,8 @@ class SchemeService
                 static fn (array $unit): string => trim((string) ($unit['code'] ?? '')) . ' — ' . trim((string) ($unit['name'] ?? '')),
                 $units
             ),
-            'training_info' => [
-                'jadwal' => ['label' => 'Jadwal Pelatihan', 'status' => 'Hubungi kami', 'detail' => 'Jadwal dikonfirmasi melalui konsultasi dengan penyelenggara.'],
-                'durasi' => ['label' => 'Durasi Program', 'status' => 'Perlu verifikasi', 'detail' => 'Durasi dan moda penyelenggaraan dikonfirmasi bersama penyelenggara.'],
-                'investasi' => ['label' => 'Investasi Biaya', 'status' => 'Hubungi kami', 'detail' => 'Biaya tidak dipublikasikan. Hubungi kami untuk penawaran resmi.'],
-                'persyaratan' => ['label' => 'Persyaratan Peserta', 'status' => 'Perlu verifikasi', 'detail' => 'Persyaratan peserta dikonfirmasi ke penyelenggara skema.'],
-                'otorisasi' => ['label' => 'Status Otorisasi', 'status' => 'Perlu verifikasi', 'detail' => 'Status skema kompetensi dikonfirmasi bersama LSP/penyelenggara terkait.'],
-            ],
-            'faqs' => [
+            'training_info' => $trainingInfo,
+            'faqs' => $sourceKey === 'ayana' ? [] : [
                 [
                     'question' => 'Berapa durasi pelaksanaan skema ini?',
                     'answer' => 'Durasi belum dipublikasikan dan perlu verifikasi melalui konsultasi dengan penyelenggara.',
@@ -679,6 +775,26 @@ class SchemeService
     public static function isExcluded(string $name): bool
     {
         return self::isExcludedService($name);
+    }
+
+    /** Assign editorial categories from the topic named by the source title. */
+    protected function trainingCategory(string $name): string
+    {
+        $title = mb_strtolower($name);
+        $rules = [
+            'Pertambangan dan Geologi' => ['tambang', 'pertambangan', 'mining', 'minerba', 'geologi', 'eksplorasi', 'mineral', 'smelter', 'hilirisasi', 'ore', 'tailings', 'crusher', 'ferronickel'],
+            'Minyak, Gas, dan Pemboran' => ['drilling', 'pemboran', 'bor ', 'migas', 'oil', 'gas', 'petroleum', 'well ', 'well-', 'rig', 'completion', 'cementing', 'mud ', 'hydrocarbon', 'hidrokarbon', 'pipeline', 'pipel'],
+            'Keselamatan dan Lingkungan' => ['k3', 'safety', 'keselamatan', 'lingkungan', 'limbah', 'emergency', 'darurat', 'hse', 'waste'],
+            'Teknik, Listrik, dan Instrumentasi' => ['engineering', 'teknik', 'listrik', 'elektr', 'instrument', 'mekanik', 'mesin', 'vibrasi', 'compressor', 'compresor', 'psv', 'valve', 'maintenance', 'pemeliharaan'],
+            'Energi dan Pengolahan Proses' => ['energi', 'power plant', 'pembangkit', 'steam', 'process', 'proses', 'produksi', 'processing', 'filtration', 'screening', 'grinding', 'water treatment'],
+            'Konstruksi dan Alat Berat' => ['konstruksi', 'construction', 'alat berat', 'crane', 'rigging', 'forklift', 'scaffolding', 'scaffold'],
+            'Bisnis dan Manajemen' => ['manajemen', 'management', 'bisnis', 'business', 'supply chain', 'rantai pasok', 'keuangan', 'finance', 'akuntansi', 'sdm', 'sumber daya manusia', 'pemasaran', 'sales', 'procurement', 'pengadaan', 'hukum', 'perizinan', 'legal', 'pensiun'],
+            'Teknologi dan Data' => ['data', 'digital', 'komputer', 'computer', 'software', 'it ', 'teknologi informasi', 'cyber', 'network', 'jaringan', 'programming'],
+        ];
+        foreach ($rules as $category => $keywords) {
+            foreach ($keywords as $keyword) if (str_contains($title, $keyword)) return $category;
+        }
+        return 'Operasi dan Profesi Teknis';
     }
 
     /**
@@ -800,8 +916,8 @@ class SchemeService
 
         return $metadata[$slug] ?? [
             'image' => '/images/home/hero-industrial.jpg',
-            'alt' => 'Layanan dan pelatihan profesional industri ' . config('app.name', 'Najkaltare'),
-            'description' => 'Katalog layanan dan pelatihan profesional terpadu dari ' . config('app.name', 'Najkaltare') . ' untuk mendukung peningkatan kompetensi industri.',
+            'alt' => 'Layanan dan pelatihan profesional industri ' . config('app.name', 'Chifheto'),
+            'description' => 'Katalog layanan dan pelatihan profesional terpadu dari ' . config('app.name', 'Chifheto') . ' untuk mendukung peningkatan kompetensi industri.',
         ];
     }
 }

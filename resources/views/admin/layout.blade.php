@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>@yield('title', 'Admin Panel') — {{ config('app.name', 'Najkaltare') }}</title>
+    <title>@yield('title', 'Admin Panel') — {{ config('app.name', 'Chifheto') }}</title>
 
     <!-- Theme Color -->
     <meta name="theme-color" content="#0C0C0C">
@@ -108,7 +108,7 @@
 
     <!-- Admin Footer -->
     <footer class="bg-white border-t border-neutral-200 py-4 text-center text-xs text-neutral-500">
-        {{ config('app.name', 'Najkaltare') }} &mdash; Administrator Panel &copy; {{ date('Y') }}
+        {{ config('app.name', 'Chifheto') }} &mdash; Administrator Panel &copy; {{ date('Y') }}
     </footer>
 
     @stack('scripts')

@@ -26,7 +26,7 @@ class OllamaPromptTest extends TestCase
                 'slug' => 'judul-test',
                 'excerpt' => 'Excerpt test',
                 'content' => $content,
-                'seo_title' => 'SEO Title Test | ' . config('app.name', 'Najkaltare'),
+                'seo_title' => 'SEO Title Test | ' . config('app.name', 'Chifheto'),
                 'meta_description' => 'Meta Description Test',
                 'suggested_faqs' => [],
                 'image_brief' => [],
@@ -37,7 +37,7 @@ class OllamaPromptTest extends TestCase
     public function test_prompts_carry_brand_and_global_context(): void
     {
         $this->fakeSuccessfulOllama();
-        $brand = config('app.name', 'Najkaltare');
+        $brand = config('app.name', 'Chifheto');
 
         (new OllamaService())->generateArticle([
             'city_name' => 'Bandung',
@@ -52,38 +52,39 @@ class OllamaPromptTest extends TestCase
             $prompts = $request['messages'][0]['content'] . ' ' . $request['messages'][1]['content'];
 
             return str_contains($system, $brand)
-                && str_contains($user, 'Cakupan layanan: SIA, SLO, SLF, Riksa Uji')
-                && str_contains($prompts, 'pelatihan, sertifikasi, inspeksi')
+                && str_contains($user, 'konteks pelatihan dan industri')
+                && str_contains($prompts, 'platform informasi dan konsultasi pelatihan profesional')
+                && str_contains($prompts, 'judul katalog')
                 && !str_contains($prompts, 'Jucerdyamg');
         });
     }
 
     public function test_prompt_uses_configured_brand_and_selected_service_naturally(): void
     {
-        config(['app.name' => 'Najkaltare Uji']);
+        config(['app.name' => 'Chifheto Uji']);
         $this->fakeSuccessfulOllama();
 
         (new OllamaService())->generateArticle([
             'city_name' => 'Bandung',
             'city_slug' => 'bandung',
             'word_count' => 7500,
-            'service_slug' => 'sia',
+            'service_slug' => 'pelatihan-pengolahan-dan-pemurnian-processing-tambang',
         ]);
 
         Http::assertSent(function (object $request): bool {
             $system = $request['messages'][0]['content'];
             $user = $request['messages'][1]['content'];
 
-            return str_contains($system, 'Najkaltare Uji')
-                && str_contains($system, 'Program spesifik: SIA')
-                && str_contains($user, 'Program Spesifik: SIA')
+            return str_contains($system, 'Chifheto Uji')
+                && str_contains($system, 'Topik katalog: Pelatihan Pengolahan dan Pemurnian (Processing) Tambang')
+                && str_contains($user, 'Program Spesifik: Pelatihan Pengolahan dan Pemurnian (Processing) Tambang')
                 && !str_contains($system . $user, 'Jucerdyamg');
         });
     }
 
     public function test_fallback_text_uses_the_dynamic_brand(): void
     {
-        config(['app.name' => 'Najkaltare Dinamis']);
+        config(['app.name' => 'Chifheto Dinamis']);
 
         $result = (new OllamaService())->parseResponse(
             '<p>Konten fallback yang tidak berbentuk JSON.</p>',
@@ -92,8 +93,8 @@ class OllamaPromptTest extends TestCase
             7500
         );
 
-        $this->assertStringContainsString('Najkaltare Dinamis', $result['seo_title']);
-        $this->assertStringContainsString('Najkaltare Dinamis', $result['image_brief']['recommended_alt']);
+        $this->assertStringContainsString('Chifheto Dinamis', $result['seo_title']);
+        $this->assertStringContainsString('Chifheto Dinamis', $result['image_brief']['recommended_alt']);
         $this->assertStringNotContainsString('Jucerdyamg', json_encode($result));
     }
 
@@ -113,9 +114,9 @@ class OllamaPromptTest extends TestCase
         ]), 'Fallback', 'Bandung', 7500);
 
         $encoded = json_encode($result);
-        $this->assertStringContainsString(config('app.name', 'Najkaltare'), $encoded);
+        $this->assertStringContainsString(config('app.name', 'Chifheto'), $encoded);
         $this->assertStringNotContainsString('Jucerdyamg', $encoded);
-        $this->assertStringContainsString('<p>Konsultasikan layanan ' . config('app.name', 'Najkaltare') . '.</p>', $result['content']);
+        $this->assertStringContainsString('<p>Konsultasikan layanan ' . config('app.name', 'Chifheto') . '.</p>', $result['content']);
     }
 
     public function test_prompts_exclude_legacy_identifiers(): void
@@ -141,7 +142,7 @@ class OllamaPromptTest extends TestCase
     {
         $this->fakeSuccessfulOllama();
 
-        $scheme = (new SchemeService())->find('teknisi-pelindian');
+        $scheme = (new SchemeService())->findTraining('pelatihan-pengolahan-dan-pemurnian-processing-tambang');
         $this->assertNotNull($scheme);
         $title = (string) $scheme['title'];
 
@@ -149,14 +150,14 @@ class OllamaPromptTest extends TestCase
             'city_name' => 'Bandung',
             'city_slug' => 'bandung',
             'word_count' => 7500,
-            'service_slug' => 'teknisi-pelindian',
+            'service_slug' => 'pelatihan-pengolahan-dan-pemurnian-processing-tambang',
         ]);
 
         Http::assertSent(function (object $request) use ($title): bool {
             $system = $request['messages'][0]['content'];
             $user = $request['messages'][1]['content'];
 
-            return str_contains($system, 'Program spesifik: ' . $title)
+            return str_contains($system, 'Topik katalog: ' . $title)
                 && str_contains($user, '- Program Spesifik: ' . $title);
         });
     }

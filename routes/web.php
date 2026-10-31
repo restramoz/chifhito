@@ -49,6 +49,17 @@ Route::get('/kota/{city}/layanan/{program}', [ProgramController::class, 'cityPro
 Route::get('/kota/{city}/program/{program}', [ProgramController::class, 'cityProgram'])
     ->name('city.program.legacy');
 
+// Contextual Ayana training pages within the existing regional hierarchy.
+Route::get('/provinsi/{province}/pelatihan/{program}', [ProgramController::class, 'provinceTraining'])
+    ->name('regional.province.program')
+    ->where(['province' => '[a-z0-9\-]+', 'program' => '[a-z0-9\-]+']);
+Route::get('/kota/{city}/pelatihan/{program}', [ProgramController::class, 'cityTraining'])
+    ->name('regional.city.program')
+    ->where(['city' => '[a-z0-9\-]+', 'program' => '[a-z0-9\-]+']);
+Route::get('/kecamatan/{citySlug}/{districtSlug}/pelatihan/{program}', [ProgramController::class, 'districtTraining'])
+    ->name('regional.district.program')
+    ->where(['citySlug' => '[a-z0-9\-]+', 'districtSlug' => '[a-z0-9\-]+', 'program' => '[a-z0-9\-]+']);
+
 // Public Articles
 Route::get('/artikel', [PublicArticleController::class, 'index'])->name('articles.index');
 Route::get('/artikel/{slug}', [PublicArticleController::class, 'show'])->name('articles.show');
